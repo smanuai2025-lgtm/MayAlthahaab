@@ -50,11 +50,12 @@
                     <td>
                         <select onchange="updateOrderStatus(@order.Id, this.value)"
                                 class="bg-luxury-section border border-luxury-border rounded-lg px-2 py-1 text-xs cursor-pointer">
-                            <option value="Pending" @(order.OrderStatus == "Pending" ? "selected" : "")>معلق</option>
-                            <option value="Processing" @(order.OrderStatus == "Processing" ? "selected" : "")>جاري</option>
-                            <option value="Shipped" @(order.OrderStatus == "Shipped" ? "selected" : "")>مشحون</option>
-                            <option value="Delivered" @(order.OrderStatus == "Delivered" ? "selected" : "")>مُسلَّم</option>
-                            <option value="Cancelled" @(order.OrderStatus == "Cancelled" ? "selected" : "")>ملغي</option>
+                            @{ var os = order.OrderStatus; }
+                            @if (os == "Pending") { <option value="Pending" selected="selected">معلق</option> } else { <option value="Pending">معلق</option> }
+                            @if (os == "Processing") { <option value="Processing" selected="selected">جاري</option> } else { <option value="Processing">جاري</option> }
+                            @if (os == "Shipped") { <option value="Shipped" selected="selected">مشحون</option> } else { <option value="Shipped">مشحون</option> }
+                            @if (os == "Delivered") { <option value="Delivered" selected="selected">مُسلَّم</option> } else { <option value="Delivered">مُسلَّم</option> }
+                            @if (os == "Cancelled") { <option value="Cancelled" selected="selected">ملغي</option> } else { <option value="Cancelled">ملغي</option> }
                         </select>
                     </td>
                     <td class="text-gray-400 text-xs">@order.CreatedAt.ToString("dd/MM/yy HH:mm")</td>

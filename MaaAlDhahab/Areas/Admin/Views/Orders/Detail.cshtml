@@ -24,11 +24,12 @@
                 <div class="flex justify-between">
                     <span class="text-gray-400">حالة الطلب</span>
                     <select onchange="updateOrderStatus(@Model.Id, this.value)" class="bg-luxury-section border border-luxury-border rounded px-2 py-1 text-xs">
-                        <option value="Pending" @(Model.OrderStatus == "Pending" ? "selected" : "")>معلق</option>
-                        <option value="Processing" @(Model.OrderStatus == "Processing" ? "selected" : "")>جاري</option>
-                        <option value="Shipped" @(Model.OrderStatus == "Shipped" ? "selected" : "")>مشحون</option>
-                        <option value="Delivered" @(Model.OrderStatus == "Delivered" ? "selected" : "")>مُسلَّم</option>
-                        <option value="Cancelled" @(Model.OrderStatus == "Cancelled" ? "selected" : "")>ملغي</option>
+                        @{ var mos = Model.OrderStatus; }
+                        @if (mos == "Pending") { <option value="Pending" selected="selected">معلق</option> } else { <option value="Pending">معلق</option> }
+                        @if (mos == "Processing") { <option value="Processing" selected="selected">جاري</option> } else { <option value="Processing">جاري</option> }
+                        @if (mos == "Shipped") { <option value="Shipped" selected="selected">مشحون</option> } else { <option value="Shipped">مشحون</option> }
+                        @if (mos == "Delivered") { <option value="Delivered" selected="selected">مُسلَّم</option> } else { <option value="Delivered">مُسلَّم</option> }
+                        @if (mos == "Cancelled") { <option value="Cancelled" selected="selected">ملغي</option> } else { <option value="Cancelled">ملغي</option> }
                     </select>
                 </div>
                 <div class="flex justify-between"><span class="text-gray-400">الإجمالي</span><span class="text-gold font-black text-lg">@Model.Total.ToString("F3") KD</span></div>
