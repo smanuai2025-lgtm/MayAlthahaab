@@ -1,0 +1,98 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "إدارة الطلبات";
+}
+
+<!-- Filter tabs -->
+<div class="flex gap-2 mb-6 flex-wrap">
+    @{
+        var statuses = new[] { ("", "الكل"), ("Pending", "معلق"), ("Processing", "جاري"), ("Shipped", "مشحون"), ("Delivered", "مُسلَّم"), ("Cancelled", "ملغي") };
+    }
+    @foreach (var (val, label) in statuses)
+    {
+        <a href="/admin/orders@(string.IsNullOrEmpty(val) ? "" : "?status=" + val)"
+           class="px-4 py-2 rounded-xl text-sm font-bold transition-all @(ViewBag.StatusFilter == val || (string.IsNullOrEmpty(val) && ViewBag.StatusFilter == null) ? "btn-gold" : "border border-luxury-border text-gray-400 hover:border-gold hover:text-gold")">
+            @label
+        </a>
+    }
+</div>
+
+<div class="admin-card">
+    <table>
+        <thead>
+            <tr>
+                <th>رقم الطلب</th>
+                <th>العميل</th>
+                <th>المنطقة</th>
+                <th>المجموع</th>
+                <th>الدفع</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td><span class="text-gold font-black">@order.OrderNumber</span></td>
+                    <td>
+                        <p class="text-white font-bold text-sm">@order.CustomerName</p>
+                        <p class="text-gray-500 text-xs">@order.CustomerPhone</p>
+                    </td>
+                    <td class="text-gray-400 text-sm">@order.Governorate، @order.Area</td>
+                    <td><span class="text-gold font-bold">@order.Total.ToString("F3") KD</span></td>
+                    <td>
+                        <span class="badge @(order.PaymentStatus == "Paid" ? "badge-success" : "badge-warning")">
+                            @(order.PaymentStatus == "Paid" ? "مدفوع" : "معلق")
+                        </span>
+                    </td>
+                    <td>
+                        <select onchange="updateOrderStatus(@order.Id, this.value)"
+                                class="bg-luxury-section border border-luxury-border rounded-lg px-2 py-1 text-xs cursor-pointer">
+                            <option value="Pending" @(order.OrderStatus == "Pending" ? "selected" : "")>معلق</option>
+                            <option value="Processing" @(order.OrderStatus == "Processing" ? "selected" : "")>جاري</option>
+                            <option value="Shipped" @(order.OrderStatus == "Shipped" ? "selected" : "")>مشحون</option>
+                            <option value="Delivered" @(order.OrderStatus == "Delivered" ? "selected" : "")>مُسلَّم</option>
+                            <option value="Cancelled" @(order.OrderStatus == "Cancelled" ? "selected" : "")>ملغي</option>
+                        </select>
+                    </td>
+                    <td class="text-gray-400 text-xs">@order.CreatedAt.ToString("dd/MM/yy HH:mm")</td>
+                    <td>
+                        <a href="/admin/orders/detail/@order.Id" class="w-8 h-8 bg-luxury-section border border-luxury-border rounded-lg flex items-center justify-center hover:border-gold transition-colors inline-flex">
+                            <i class="fas fa-eye text-gray-400 text-xs"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-12 text-gray-500">
+            <i class="fas fa-box-open text-4xl mb-3 opacity-20"></i>
+            <p>لا توجد طلبات بعد</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+async function updateOrderStatus(orderId, status) {
+    const res = await fetch('/admin/orders/updatestatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, status })
+    });
+    const data = await res.json();
+    if (data.success) {
+        const t = document.createElement('div');
+        t.className = 'fixed bottom-4 right-4 bg-luxury-card border border-gold rounded-xl px-6 py-3 text-gold text-sm z-50 shadow-2xl';
+        t.textContent = '✓ تم تحديث حالة الطلب';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+    }
+}
+</script>
+}

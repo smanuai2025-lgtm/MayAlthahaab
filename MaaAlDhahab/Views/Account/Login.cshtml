@@ -1,0 +1,80 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex flex-col items-center gap-2">
+                <svg viewBox="0 0 60 60" class="w-16 h-16" fill="none">
+                    <circle cx="30" cy="30" r="28" stroke="#D4AF37" stroke-width="1.5"/>
+                    <path d="M30 8 L35 20 L48 20 L38 28 L42 42 L30 34 L18 42 L22 28 L12 20 L25 20 Z" fill="#D4AF37" opacity="0.9"/>
+                </svg>
+                <span class="text-gold text-2xl font-black">ماء الذهب</span>
+            </a>
+        </div>
+
+        <div class="luxury-card rounded-2xl p-8 border border-luxury-border">
+            <h1 class="text-2xl font-black text-white mb-2 text-center ar-text">تسجيل الدخول</h1>
+            <p class="text-gray-400 text-sm text-center mb-8 ar-text">مرحباً بعودتك</p>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="bg-red-900 bg-opacity-30 border border-red-700 rounded-xl p-3 mb-4">
+                    <div asp-validation-summary="All" class="text-red-400 text-sm"></div>
+                </div>
+            }
+
+            <form method="post" asp-action="Login" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">البريد الإلكتروني</label>
+                    <div class="relative">
+                        <input asp-for="Email" type="email" dir="ltr"
+                               class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 pl-10 text-sm"
+                               placeholder="email@example.com" />
+                        <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">كلمة المرور</label>
+                    <div class="relative">
+                        <input asp-for="Password" type="password" dir="ltr"
+                               class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 pl-10 text-sm"
+                               placeholder="••••••••" />
+                        <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input asp-for="RememberMe" type="checkbox" class="w-4 h-4 text-gold" />
+                        <span class="text-gray-400 text-sm ar-text">تذكرني</span>
+                    </label>
+                    <a href="#" class="text-gold text-sm hover:underline ar-text">نسيت كلمة المرور؟</a>
+                </div>
+
+                <button type="submit" class="btn-gold w-full py-4 rounded-xl font-bold text-lg ar-text">
+                    <i class="fas fa-sign-in-alt ml-2"></i> دخول
+                </button>
+            </form>
+
+            <div class="text-center mt-6">
+                <p class="text-gray-400 text-sm ar-text">ليس لديك حساب؟
+                    <a href="/Account/Register" class="text-gold hover:underline font-bold">إنشاء حساب جديد</a>
+                </p>
+            </div>
+
+            <!-- Demo credentials hint -->
+            <div class="mt-6 p-3 bg-luxury-section rounded-xl border border-luxury-border">
+                <p class="text-gray-500 text-xs text-center ar-text">للوصول للإدارة: admin@maaAldhahab.com / Admin@123456</p>
+            </div>
+        </div>
+    </div>
+</div>

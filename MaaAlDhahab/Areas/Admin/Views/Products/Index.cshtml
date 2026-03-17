@@ -1,0 +1,125 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "إدارة المنتجات";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div class="flex gap-3">
+        <input type="text" placeholder="ابحث عن منتج..." class="bg-luxury-section border border-luxury-border rounded-xl px-4 py-2 text-sm w-64" id="search-input" />
+        <select class="bg-luxury-section border border-luxury-border rounded-xl px-4 py-2 text-sm">
+            <option>كل الفئات</option>
+            @foreach (var cat in (List<Category>)ViewBag.Categories)
+            {
+                <option value="@cat.Id">@cat.NameAr</option>
+            }
+        </select>
+    </div>
+    <a href="/admin/products/create" class="btn-gold px-5 py-2 rounded-xl text-sm flex items-center gap-2">
+        <i class="fas fa-plus"></i> إضافة منتج
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="overflow-x-auto">
+        <table>
+            <thead>
+                <tr>
+                    <th>الصورة</th>
+                    <th>الاسم</th>
+                    <th>الفئة</th>
+                    <th>السعر (KD)</th>
+                    <th>التقييم</th>
+                    <th>المميز</th>
+                    <th>الحالة</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="w-12 h-12 rounded-lg overflow-hidden bg-luxury-section">
+                                <img src="@product.ImageUrl" class="w-full h-full object-cover"
+                                     onerror="this.src='/images/product-placeholder.svg'" />
+                            </div>
+                        </td>
+                        <td>
+                            <p class="text-white font-bold">@product.NameAr</p>
+                            <p class="text-gray-500 text-xs">@product.NameEn</p>
+                        </td>
+                        <td><span class="badge badge-gold">@(product.Category?.NameAr ?? "-")</span></td>
+                        <td><span class="text-gold font-bold">@product.PriceKWD.ToString("F3")</span></td>
+                        <td>
+                            <div class="flex items-center gap-1">
+                                <i class="fas fa-star text-gold text-xs"></i>
+                                <span class="text-gray-300 text-xs">@product.Rating.ToString("F1")</span>
+                            </div>
+                        </td>
+                        <td>
+                            <button onclick="toggleFeatured(@product.Id, this)"
+                                    class="text-sm @(product.IsFeatured ? "text-gold" : "text-gray-500") hover:text-gold transition-colors">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <span class="badge @(product.IsActive ? "badge-success" : "badge-danger")">
+                                @(product.IsActive ? "نشط" : "مخفي")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <a href="/admin/products/edit/@product.Id" class="w-8 h-8 bg-gold bg-opacity-20 rounded-lg flex items-center justify-center hover:bg-gold hover:text-black transition-all">
+                                    <i class="fas fa-edit text-gold text-xs"></i>
+                                </a>
+                                <a href="/Product/Detail/@product.Id" target="_blank" class="w-8 h-8 bg-luxury-section rounded-lg flex items-center justify-center hover:border-gold border border-luxury-border transition-all">
+                                    <i class="fas fa-eye text-gray-400 text-xs"></i>
+                                </a>
+                                <button onclick="deleteProduct(@product.Id, this.closest('tr'))" class="w-8 h-8 bg-red-900 bg-opacity-30 rounded-lg flex items-center justify-center hover:bg-red-900 transition-all">
+                                    <i class="fas fa-trash text-red-400 text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+async function toggleFeatured(id, btn) {
+    const res = await fetch(`/admin/products/togglefeatured/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+        btn.querySelector('i').style.color = data.isFeatured ? '#D4AF37' : '#6B7280';
+        showAdminToast(data.isFeatured ? 'تم إضافته للمميزات' : 'تم إزالته من المميزات');
+    }
+}
+
+async function deleteProduct(id, row) {
+    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    const res = await fetch(`/admin/products/delete/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) { row.remove(); showAdminToast('تم حذف المنتج'); }
+}
+
+function showAdminToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'fixed bottom-4 right-4 bg-luxury-card border border-gold rounded-xl px-6 py-3 text-gold text-sm z-50 shadow-2xl';
+    t.textContent = '✓ ' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+// Search filter
+document.getElementById('search-input').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const name = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+        row.style.display = name.includes(q) ? '' : 'none';
+    });
+});
+</script>
+}

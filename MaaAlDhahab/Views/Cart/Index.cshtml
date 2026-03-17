@@ -1,0 +1,218 @@
+@model CartViewModel
+@{
+    ViewData["Title"] = "سلة التسوق";
+}
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black text-white mb-2 ar-text">سلة <span class="gold-gradient">التسوق</span></h1>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="text-center py-32">
+            <div class="w-24 h-24 bg-luxury-section border border-luxury-border rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-shopping-bag text-4xl text-gray-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2 ar-text">سلتك فارغة</h2>
+            <p class="text-gray-400 mb-8 ar-text">لم تضف أي عطر بعد. اكتشف مجموعتنا الفاخرة!</p>
+            <a href="/Shop" class="btn-gold px-10 py-4 rounded-xl font-bold text-lg">
+                <i class="fas fa-store ml-2"></i>
+                <span class="ar-text">تسوق الآن</span>
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="grid lg:grid-cols-3 gap-10">
+            <!-- Cart Items -->
+            <div class="lg:col-span-2 space-y-4">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="luxury-card rounded-2xl p-5 border border-luxury-border flex gap-4 items-center cart-item"
+                         data-product-id="@item.ProductId" data-size="@item.Size">
+                        <!-- Image -->
+                        <div class="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-luxury-section">
+                            <img src="@item.ImageUrl" alt="@item.ProductName" class="w-full h-full object-cover"
+                                 onerror="this.src='/images/product-placeholder.svg'" />
+                        </div>
+
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-white ar-text">@item.ProductName</h3>
+                            <p class="text-gray-500 text-xs mt-0.5">@item.Size</p>
+                            <p class="text-gold font-bold text-sm mt-1">@item.UnitPrice.ToString("F3") KD / قطعة</p>
+                        </div>
+
+                        <!-- Quantity Controls -->
+                        <div class="flex items-center border border-luxury-border rounded-xl overflow-hidden">
+                            <button onclick="updateCartQty(@item.ProductId, '@item.Size', @(item.Quantity - 1), this.closest('.cart-item'))"
+                                    class="px-3 py-2 hover:bg-luxury-hover text-gold font-bold">-</button>
+                            <span class="item-qty px-4 py-2 text-white font-bold border-x border-luxury-border">@item.Quantity</span>
+                            <button onclick="updateCartQty(@item.ProductId, '@item.Size', @(item.Quantity + 1), this.closest('.cart-item'))"
+                                    class="px-3 py-2 hover:bg-luxury-hover text-gold font-bold">+</button>
+                        </div>
+
+                        <!-- Item Total -->
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-gold font-black item-total">@((item.UnitPrice * item.Quantity).ToString("F3")) KD</p>
+                        </div>
+
+                        <!-- Remove -->
+                        <button onclick="removeFromCart(@item.ProductId, '@item.Size', this.closest('.cart-item'))"
+                                class="text-gray-600 hover:text-red-400 transition-colors flex-shrink-0 p-2">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <!-- Order Summary -->
+            <div class="space-y-4 sticky top-24">
+                <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                    <h2 class="text-xl font-black text-white mb-6 ar-text">ملخص الطلب</h2>
+
+                    <!-- Coupon -->
+                    <div class="mb-6">
+                        <label class="text-gray-400 text-sm mb-2 block ar-text">كود الخصم</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="coupon-input" placeholder="أدخل الكود..." value="@Model.CouponCode"
+                                   class="flex-1 bg-luxury-section border border-luxury-border rounded-xl px-4 py-2 text-sm uppercase" />
+                            <button onclick="applyCoupon()" class="btn-gold px-4 py-2 rounded-xl text-sm font-bold ar-text">تطبيق</button>
+                        </div>
+                        <p id="coupon-msg" class="text-xs mt-2 hidden"></p>
+                    </div>
+
+                    <hr class="border-luxury-border mb-4" />
+
+                    <!-- Subtotal -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 ar-text">المجموع الفرعي</span>
+                            <span class="text-white font-bold" id="cart-subtotal">@Model.SubTotal.ToString("F3") KD</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400 ar-text">رسوم التوصيل</span>
+                            <span class="text-white">@Model.DeliveryFee.ToString("F3") KD</span>
+                        </div>
+                        @if (Model.Discount > 0)
+                        {
+                            <div class="flex justify-between text-sm">
+                                <span class="text-green-400 ar-text">الخصم (@Model.CouponCode)</span>
+                                <span class="text-green-400 font-bold" id="cart-discount">-@Model.Discount.ToString("F3") KD</span>
+                            </div>
+                        }
+                        <hr class="border-luxury-border" />
+                        <div class="flex justify-between text-xl font-black">
+                            <span class="text-white ar-text">الإجمالي</span>
+                            <span class="text-gold" id="cart-total">@Model.Total.ToString("F3") KD</span>
+                        </div>
+                    </div>
+
+                    <!-- Free Shipping Note -->
+                    @if (Model.SubTotal < 15)
+                    {
+                        var remaining = 15 - Model.SubTotal;
+                        <div class="mt-4 p-3 bg-gold bg-opacity-10 border border-gold border-opacity-30 rounded-xl">
+                            <p class="text-gold text-xs ar-text">أضف <strong>@remaining.ToString("F3") KD</strong> للحصول على شحن مجاني! 🎁</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mt-4 p-3 bg-green-900 bg-opacity-30 border border-green-700 rounded-xl">
+                            <p class="text-green-400 text-xs ar-text">✓ تهانينا! حصلت على شحن مجاني</p>
+                        </div>
+                    }
+
+                    <a href="/Checkout" class="btn-gold w-full py-4 rounded-xl font-bold text-lg text-center block mt-6">
+                        <i class="fas fa-lock ml-2"></i>
+                        <span class="ar-text">إتمام الشراء</span>
+                        <span class="en-text hidden">Checkout</span>
+                    </a>
+
+                    <a href="/Shop" class="block text-center text-gray-400 hover:text-gold text-sm mt-4">
+                        <i class="fas fa-arrow-right ml-1"></i>
+                        <span class="ar-text">← متابعة التسوق</span>
+                    </a>
+                </div>
+
+                <!-- Security Badges -->
+                <div class="luxury-card rounded-2xl p-4 border border-luxury-border">
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div>
+                            <i class="fas fa-shield-alt text-gold text-xl mb-1"></i>
+                            <p class="text-gray-500 text-xs ar-text">دفع آمن</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-undo text-gold text-xl mb-1"></i>
+                            <p class="text-gray-500 text-xs ar-text">إرجاع مجاني</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-headset text-gold text-xl mb-1"></i>
+                            <p class="text-gray-500 text-xs ar-text">دعم 24/7</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+async function updateCartQty(productId, size, qty, itemEl) {
+    const res = await fetch('/Cart/UpdateQuantity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, size, quantity: qty })
+    });
+    const data = await res.json();
+    if (data.success) {
+        if (qty <= 0) {
+            itemEl.remove();
+        } else {
+            itemEl.querySelector('.item-qty').textContent = qty;
+            itemEl.querySelector('.item-total').textContent = data.itemTotal + ' KD';
+        }
+        document.getElementById('cart-subtotal').textContent = data.cartSubTotal + ' KD';
+        document.getElementById('cart-total').textContent = data.cartTotal + ' KD';
+        updateNavCartCount(data.cartCount);
+    }
+}
+
+async function removeFromCart(productId, size, itemEl) {
+    const res = await fetch('/Cart/Remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, size })
+    });
+    const data = await res.json();
+    if (data.success) {
+        itemEl.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => { itemEl.remove(); if (data.cartCount === 0) location.reload(); }, 300);
+        document.getElementById('cart-subtotal').textContent = data.cartSubTotal + ' KD';
+        document.getElementById('cart-total').textContent = data.cartTotal + ' KD';
+        updateNavCartCount(data.cartCount);
+    }
+}
+
+async function applyCoupon() {
+    const code = document.getElementById('coupon-input').value.trim();
+    if (!code) return;
+    const res = await fetch('/Cart/ApplyCoupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+    const msg = document.getElementById('coupon-msg');
+    msg.classList.remove('hidden');
+    if (data.success) {
+        msg.className = 'text-green-400 text-xs mt-2';
+        msg.textContent = data.message;
+        document.getElementById('cart-total').textContent = data.cartTotal + ' KD';
+    } else {
+        msg.className = 'text-red-400 text-xs mt-2';
+        msg.textContent = data.message;
+    }
+}
+</script>
+}

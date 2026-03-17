@@ -1,0 +1,186 @@
+/* ═══════════════════════════════════════════════════
+   ماء الذهب - Luxury Custom CSS
+   Mobile-first, RTL, Dark Luxury Theme
+   ═══════════════════════════════════════════════════ */
+
+/* Custom Fonts Fallback */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&family=Cairo:wght@300;400;600;700;800&display=swap');
+
+/* ── Base Reset ── */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* ── Gold Shimmer Animation ── */
+@keyframes goldShimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(30px); }
+}
+
+@keyframes goldPulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(212,175,55,0.3); }
+    50% { box-shadow: 0 0 25px rgba(212,175,55,0.8), 0 0 50px rgba(212,175,55,0.4); }
+}
+
+@keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.7; transform: scale(1.2) rotate(180deg); }
+}
+
+/* ── Shimmer Loading Effect ── */
+.shimmer {
+    background: linear-gradient(
+        to right,
+        #1a1a1a 8%,
+        #2a2a2a 18%,
+        #1a1a1a 33%
+    );
+    background-size: 2000px 100%;
+    animation: goldShimmer 2s linear infinite;
+}
+
+/* ── Product Card Hover ── */
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.5) !important;
+}
+
+/* ── Gold Glow Text ── */
+.gold-glow-strong {
+    text-shadow:
+        0 0 10px rgba(212, 175, 55, 0.8),
+        0 0 30px rgba(212, 175, 55, 0.5),
+        0 0 60px rgba(212, 175, 55, 0.3);
+}
+
+/* ── Luxury Divider ── */
+.gold-divider {
+    background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+    height: 1px;
+    border: none;
+}
+
+/* ── Custom Checkbox & Radio ── */
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: #D4AF37;
+}
+
+/* ── Selection Highlight ── */
+::selection {
+    background: rgba(212, 175, 55, 0.3);
+    color: #F5E6B2;
+}
+
+/* ── Input Placeholder ── */
+::placeholder {
+    color: #4B5563 !important;
+}
+
+/* ── Focus Ring Override ── */
+:focus-visible {
+    outline: 2px solid #D4AF37;
+    outline-offset: 2px;
+}
+
+/* ── Mobile Touch Feedback ── */
+@media (hover: none) {
+    .btn-gold:active {
+        transform: scale(0.97);
+    }
+}
+
+/* ── Hero Gradient Overlay ── */
+.hero-gradient {
+    background: linear-gradient(
+        135deg,
+        rgba(10, 10, 10, 0.92) 0%,
+        rgba(10, 10, 10, 0.6) 50%,
+        rgba(10, 10, 10, 0.85) 100%
+    );
+}
+
+/* ── Luxury Table ── */
+.luxury-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.luxury-table th {
+    background: #1A1A1A;
+    color: #D4AF37;
+    padding: 14px 16px;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-bottom: 1px solid #2A2A2A;
+    letter-spacing: 0.05em;
+}
+.luxury-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #1A1A1A;
+    vertical-align: middle;
+}
+.luxury-table tr:hover td {
+    background: rgba(212, 175, 55, 0.03);
+}
+
+/* ── RTL Specific ── */
+[dir="rtl"] .fa-arrow-right::before { content: "\f060"; }
+[dir="ltr"] .fa-arrow-left::before { content: "\f060"; }
+
+/* ── Scent Pyramid ── */
+.pyramid-top { clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%); }
+.pyramid-mid { clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%); }
+.pyramid-base { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+
+/* ── Cart Badge Pulse ── */
+#cart-count {
+    animation: goldPulse 2s ease-in-out infinite;
+}
+
+/* ── Page Transition ── */
+.page-enter {
+    animation: slideInUp 0.4s ease;
+}
+
+/* ── Custom Scrollbar for modals ── */
+.modal-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+.modal-scroll::-webkit-scrollbar-thumb {
+    background: #D4AF37;
+    border-radius: 2px;
+}
+
+/* ── Print Styles ── */
+@media print {
+    nav, footer, .btn-gold { display: none !important; }
+    body { background: white; color: black; }
+}
+
+/* ── High DPI Images ── */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo-img { image-rendering: -webkit-optimize-contrast; }
+}

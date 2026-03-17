@@ -1,0 +1,237 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "إتمام الشراء";
+}
+
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black text-white mb-2 ar-text">إتمام <span class="gold-gradient">الشراء</span></h1>
+    <p class="text-gray-400 mb-10 ar-text">خطوة واحدة فقط تفصلك عن عطرك الفاخر</p>
+
+    <!-- Progress Steps -->
+    <div class="flex items-center justify-center gap-4 mb-10">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gold rounded-full flex items-center justify-center text-black font-bold text-sm">1</div>
+            <span class="text-gold text-sm font-bold ar-text">العنوان</span>
+        </div>
+        <div class="flex-1 max-w-20 h-0.5 bg-luxury-border"></div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-luxury-border rounded-full flex items-center justify-center text-gray-500 font-bold text-sm" id="step2-icon">2</div>
+            <span class="text-gray-500 text-sm ar-text">الدفع</span>
+        </div>
+        <div class="flex-1 max-w-20 h-0.5 bg-luxury-border"></div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-luxury-border rounded-full flex items-center justify-center text-gray-500 font-bold text-sm">3</div>
+            <span class="text-gray-500 text-sm ar-text">التأكيد</span>
+        </div>
+    </div>
+
+    <form method="post" action="/Checkout/PlaceOrder" id="checkout-form">
+        @Html.AntiForgeryToken()
+        <div class="grid lg:grid-cols-3 gap-10">
+
+            <!-- ── ADDRESS & PAYMENT ── -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Personal Info -->
+                <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2 ar-text">
+                        <i class="fas fa-user text-gold"></i> بياناتك الشخصية
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">الاسم الكامل *</label>
+                            <input asp-for="CustomerName" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="محمد أحمد الكويتي" />
+                            <span asp-validation-for="CustomerName" class="text-red-400 text-xs"></span>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">البريد الإلكتروني *</label>
+                            <input asp-for="CustomerEmail" type="email" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="example@email.com" dir="ltr" />
+                            <span asp-validation-for="CustomerEmail" class="text-red-400 text-xs"></span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">رقم الهاتف *</label>
+                            <input asp-for="CustomerPhone" type="tel" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="+965 xxxx xxxx" dir="ltr" />
+                            <span asp-validation-for="CustomerPhone" class="text-red-400 text-xs"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kuwait Address -->
+                <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2 ar-text">
+                        <i class="fas fa-map-marker-alt text-gold"></i> عنوان التوصيل (الكويت)
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">المحافظة *</label>
+                            <select asp-for="Governorate" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm cursor-pointer">
+                                <option value="">اختر المحافظة</option>
+                                <option>العاصمة</option>
+                                <option>حولي</option>
+                                <option>الفروانية</option>
+                                <option>الأحمدي</option>
+                                <option>الجهراء</option>
+                                <option>مبارك الكبير</option>
+                            </select>
+                            <span asp-validation-for="Governorate" class="text-red-400 text-xs"></span>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">المنطقة *</label>
+                            <input asp-for="Area" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="مثال: السالمية" />
+                            <span asp-validation-for="Area" class="text-red-400 text-xs"></span>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">القطعة *</label>
+                            <input asp-for="Block" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="رقم أو اسم القطعة" />
+                            <span asp-validation-for="Block" class="text-red-400 text-xs"></span>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">الشارع *</label>
+                            <input asp-for="Street" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="اسم أو رقم الشارع" />
+                            <span asp-validation-for="Street" class="text-red-400 text-xs"></span>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">رقم المنزل/الشقة *</label>
+                            <input asp-for="HouseNumber" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="مثال: 5 أو شقة 12" />
+                            <span asp-validation-for="HouseNumber" class="text-red-400 text-xs"></span>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1 ar-text">ملاحظات إضافية</label>
+                            <input asp-for="AddressNotes" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="علامة مميزة، طابق..." />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2 ar-text">
+                        <i class="fas fa-credit-card text-gold"></i> طريقة الدفع
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="PaymentMethod" value="KNET" checked class="sr-only" />
+                            <div class="luxury-card rounded-xl p-5 border-2 border-gold flex items-center gap-4 payment-option selected-payment">
+                                <div class="w-12 h-12 bg-luxury-section rounded-xl flex items-center justify-center border border-gold">
+                                    <span class="text-gold font-black text-sm">KNET</span>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold ar-text">كي نت</p>
+                                    <p class="text-gray-400 text-xs ar-text">بطاقة ائتمانية كويتية</p>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="PaymentMethod" value="Cash" class="sr-only" />
+                            <div class="luxury-card rounded-xl p-5 border-2 border-luxury-border flex items-center gap-4 payment-option hover:border-gold transition-colors">
+                                <div class="w-12 h-12 bg-luxury-section rounded-xl flex items-center justify-center border border-luxury-border">
+                                    <i class="fas fa-money-bill text-gray-400 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold ar-text">الدفع عند الاستلام</p>
+                                    <p class="text-gray-400 text-xs ar-text">ادفع نقداً عند التوصيل</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- KNET Mock UI -->
+                    <div id="knet-form" class="mt-6 p-5 bg-luxury-section rounded-xl border border-luxury-border">
+                        <p class="text-yellow-400 text-sm flex items-center gap-2 mb-4">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="ar-text">ستُحوَّل إلى بوابة KNET الآمنة عند الضغط على "تأكيد الطلب"</span>
+                        </p>
+                        <div class="flex gap-3 items-center">
+                            <div class="w-10 h-8 bg-blue-700 rounded flex items-center justify-center text-white text-xs font-bold">KNET</div>
+                            <div class="w-10 h-8 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">VISA</div>
+                            <div class="w-10 h-8 bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold">MC</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ORDER SUMMARY ── -->
+            <div class="space-y-4 sticky top-24">
+                <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                    <h2 class="text-xl font-bold text-white mb-6 ar-text">ملخص طلبك</h2>
+
+                    <!-- Items -->
+                    <div class="space-y-3 mb-6 max-h-48 overflow-y-auto">
+                        @if (Model.Cart != null)
+                        {
+                            @foreach (var item in Model.Cart.Items)
+                            {
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-luxury-section">
+                                        <img src="@item.ImageUrl" class="w-full h-full object-cover"
+                                             onerror="this.src='/images/product-placeholder.svg'" />
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-white text-xs font-bold truncate ar-text">@item.ProductName</p>
+                                        <p class="text-gray-500 text-xs">@item.Size × @item.Quantity</p>
+                                    </div>
+                                    <span class="text-gold text-sm font-bold flex-shrink-0">@((item.UnitPrice * item.Quantity).ToString("F3")) KD</span>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <hr class="border-luxury-border mb-4" />
+
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400 ar-text">المجموع</span>
+                            <span class="text-white">@Model.Cart?.SubTotal.ToString("F3") KD</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400 ar-text">التوصيل</span>
+                            <span class="text-white">@Model.Cart?.DeliveryFee.ToString("F3") KD</span>
+                        </div>
+                        @if (Model.Cart?.Discount > 0)
+                        {
+                            <div class="flex justify-between">
+                                <span class="text-green-400 ar-text">الخصم</span>
+                                <span class="text-green-400">-@Model.Cart?.Discount.ToString("F3") KD</span>
+                            </div>
+                        }
+                        <hr class="border-luxury-border" />
+                        <div class="flex justify-between text-lg font-black">
+                            <span class="text-white ar-text">الإجمالي</span>
+                            <span class="text-gold">@Model.Cart?.Total.ToString("F3") KD</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-gold w-full py-4 rounded-xl font-bold text-lg mt-6">
+                        <i class="fas fa-lock ml-2"></i>
+                        <span class="ar-text">تأكيد الطلب</span>
+                    </button>
+
+                    <p class="text-gray-500 text-xs text-center mt-3 ar-text">
+                        <i class="fas fa-shield-alt ml-1"></i>
+                        معاملتك محمية ومشفرة بالكامل
+                    </p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+// Payment method selection visual
+document.querySelectorAll('.payment-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.payment-option').forEach(o => {
+            o.classList.remove('border-gold');
+            o.classList.add('border-luxury-border');
+        });
+        this.classList.add('border-gold');
+        this.classList.remove('border-luxury-border');
+        const val = this.querySelector('input[type="radio"]')?.value || this.closest('label').querySelector('input').value;
+        document.getElementById('knet-form').style.display = val === 'KNET' ? 'block' : 'none';
+    });
+});
+// Fix radio inputs (hidden)
+document.querySelectorAll('input[name="PaymentMethod"]').forEach(r => {
+    r.closest('label').addEventListener('click', () => r.checked = true);
+});
+</script>
+}

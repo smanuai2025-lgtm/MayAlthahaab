@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#121212"/>
+  <!-- Bottle shape -->
+  <rect x="100" y="60" width="60" height="25" rx="8" fill="#2A2A2A" stroke="#D4AF37" stroke-width="1"/>
+  <rect x="112" y="83" width="36" height="15" rx="3" fill="#2A2A2A"/>
+  <rect x="70" y="96" width="160" height="190" rx="20" fill="#1A1A1A" stroke="#D4AF37" stroke-width="1.5"/>
+  <!-- Label area -->
+  <rect x="85" y="145" width="130" height="90" rx="8" fill="#D4AF37" opacity="0.15" stroke="#D4AF37" stroke-width="1"/>
+  <!-- Text -->
+  <text x="150" y="175" text-anchor="middle" fill="#D4AF37" font-size="14" font-family="Cairo, Arial" font-weight="bold" opacity="0.8">ماء الذهب</text>
+  <text x="150" y="195" text-anchor="middle" fill="#D4AF37" font-size="9" font-family="Arial" opacity="0.5">MAA AL DHAHAB</text>
+  <!-- Star decoration -->
+  <text x="150" y="225" text-anchor="middle" fill="#D4AF37" font-size="16" opacity="0.3">✦</text>
+  <!-- Bottom glow -->
+  <ellipse cx="150" cy="290" rx="60" ry="10" fill="#D4AF37" opacity="0.1"/>
+</svg>

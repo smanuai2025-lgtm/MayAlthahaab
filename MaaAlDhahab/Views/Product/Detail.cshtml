@@ -1,0 +1,429 @@
+@model ProductDetailViewModel
+@{
+    ViewData["Title"] = Model.Product?.NameAr ?? "تفاصيل المنتج";
+    var p = Model.Product!;
+}
+
+<!-- Breadcrumb -->
+<nav class="bg-luxury-section border-b border-luxury-border py-3">
+    <div class="max-w-7xl mx-auto px-4 flex items-center gap-2 text-sm text-gray-500">
+        <a href="/" class="hover:text-gold">الرئيسية</a>
+        <i class="fas fa-chevron-left text-xs"></i>
+        <a href="/Shop" class="hover:text-gold ar-text">المتجر</a>
+        <i class="fas fa-chevron-left text-xs"></i>
+        <span class="text-gold ar-text">@p.NameAr</span>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="grid lg:grid-cols-2 gap-12 items-start">
+
+        <!-- ── PRODUCT IMAGES ── -->
+        <div class="sticky top-24">
+            <!-- Main Image -->
+            <div class="luxury-card rounded-2xl overflow-hidden relative bg-luxury-section h-96 md:h-[500px]">
+                <img id="main-image" src="@p.ImageUrl" alt="@p.NameAr" class="w-full h-full object-cover"
+                     onerror="this.src='/images/product-placeholder.svg'" />
+
+                <!-- Badges -->
+                <div class="absolute top-4 right-4 flex flex-col gap-2">
+                    @if (p.IsBestSeller) { <span class="bg-gold text-black text-xs px-3 py-1 rounded-full font-bold">الأكثر مبيعاً</span> }
+                    @if (p.IsNewArrival) { <span class="bg-luxury-black border border-gold text-gold text-xs px-3 py-1 rounded-full">✨ جديد</span> }
+                </div>
+
+                <!-- Wishlist -->
+                <button id="wishlist-btn" onclick="toggleWishlist(@p.Id, this)" class="absolute top-4 left-4 w-10 h-10 bg-luxury-black bg-opacity-80 rounded-full flex items-center justify-center hover:bg-gold hover:text-black transition-all">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+
+            <!-- Thumbnail Images -->
+            @if (!string.IsNullOrEmpty(p.ImageUrl2) || !string.IsNullOrEmpty(p.ImageUrl3))
+            {
+                <div class="flex gap-3 mt-4">
+                    <button onclick="changeMainImage('@p.ImageUrl')" class="w-20 h-20 rounded-xl overflow-hidden border-2 border-gold">
+                        <img src="@p.ImageUrl" alt="" class="w-full h-full object-cover" onerror="this.src='/images/product-placeholder.svg'" />
+                    </button>
+                    @if (!string.IsNullOrEmpty(p.ImageUrl2))
+                    {
+                        <button onclick="changeMainImage('@p.ImageUrl2')" class="w-20 h-20 rounded-xl overflow-hidden border-2 border-luxury-border hover:border-gold transition-colors">
+                            <img src="@p.ImageUrl2" alt="" class="w-full h-full object-cover" />
+                        </button>
+                    }
+                    @if (!string.IsNullOrEmpty(p.ImageUrl3))
+                    {
+                        <button onclick="changeMainImage('@p.ImageUrl3')" class="w-20 h-20 rounded-xl overflow-hidden border-2 border-luxury-border hover:border-gold transition-colors">
+                            <img src="@p.ImageUrl3" alt="" class="w-full h-full object-cover" />
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- ── PRODUCT DETAILS ── -->
+        <div class="space-y-6">
+            <!-- Category + Brand -->
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-500 uppercase tracking-widest ar-text">@(p.Category?.NameAr ?? "")</span>
+                <span class="text-gray-700">|</span>
+                <span class="text-xs text-gold uppercase tracking-widest">@(p.Concentration ?? "EDP")</span>
+                @if (!string.IsNullOrEmpty(p.Gender))
+                {
+                    <span class="text-xs bg-luxury-section border border-luxury-border text-gray-400 px-2 py-0.5 rounded-full ar-text">
+                        @(p.Gender == "Female" ? "نسائي" : p.Gender == "Male" ? "رجالي" : p.Gender == "Kids" ? "أطفال" : "يونيسكس")
+                    </span>
+                }
+            </div>
+
+            <!-- Name -->
+            <div>
+                <h1 class="text-4xl md:text-5xl font-black text-white ar-text gold-glow">@p.NameAr</h1>
+                <p class="text-gray-400 text-xl mt-1 en-text hidden">@p.NameEn</p>
+            </div>
+
+            <!-- Rating -->
+            <div class="flex items-center gap-3">
+                <div class="flex gap-1">
+                    @for (int s = 1; s <= 5; s++)
+                    {
+                        <i class="fas fa-star @(s <= (int)p.Rating ? "text-gold" : "text-gray-600")"></i>
+                    }
+                </div>
+                <span class="text-gold font-bold">@p.Rating.ToString("F1")</span>
+                <span class="text-gray-500 text-sm">(@p.ReviewCount تقييم)</span>
+                <a href="#reviews" class="text-gold text-sm hover:underline">اقرأ التقييمات</a>
+            </div>
+
+            <!-- Price -->
+            <div class="flex items-baseline gap-4">
+                <span class="text-4xl font-black text-gold" id="selected-price">@p.PriceKWD.ToString("F3") KD</span>
+                @if (p.OriginalPriceKWD.HasValue)
+                {
+                    <span class="text-gray-500 text-xl line-through">@p.OriginalPriceKWD.Value.ToString("F3") KD</span>
+                    var discountPct = (int)(((p.OriginalPriceKWD.Value - p.PriceKWD) / p.OriginalPriceKWD.Value) * 100);
+                    <span class="bg-red-600 text-white text-sm px-3 py-1 rounded-full font-bold">-@discountPct%</span>
+                }
+            </div>
+
+            <hr class="border-luxury-border" />
+
+            <!-- Size Selection -->
+            @if (Model.Sizes?.Any() == true)
+            {
+                <div>
+                    <h3 class="text-white font-bold mb-3 ar-text">اختر الحجم:</h3>
+                    <div class="flex flex-wrap gap-3" id="size-options">
+                        @foreach (var size in Model.Sizes)
+                        {
+                            <button onclick="selectSize('@size.Size', @size.Price, this)"
+                                    class="size-btn px-5 py-3 rounded-xl border border-luxury-border text-sm font-bold hover:border-gold transition-all @(Model.Sizes.First() == size ? "border-gold text-gold bg-gold bg-opacity-10" : "text-gray-400")"
+                                    data-size="@size.Size" data-price="@size.Price">
+                                <span class="block">@size.Size</span>
+                                <span class="block text-xs mt-0.5">@size.Price.ToString("F3") KD</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Quantity + Add to Cart -->
+            <div class="flex gap-3 items-center">
+                <!-- Qty -->
+                <div class="flex items-center border border-luxury-border rounded-xl overflow-hidden">
+                    <button onclick="changeQty(-1)" class="px-4 py-3 hover:bg-luxury-hover text-gold font-bold text-lg">-</button>
+                    <input type="number" id="qty-input" value="1" min="1" max="99" readonly
+                           class="w-14 text-center border-none bg-transparent text-white font-bold py-3 text-lg" />
+                    <button onclick="changeQty(1)" class="px-4 py-3 hover:bg-luxury-hover text-gold font-bold text-lg">+</button>
+                </div>
+
+                <!-- Add to Cart -->
+                <button onclick="addToCartDetail()" class="flex-1 btn-gold py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="ar-text">أضف للسلة</span>
+                    <span class="en-text hidden">Add to Cart</span>
+                </button>
+
+                <!-- Wishlist -->
+                <button onclick="toggleWishlist(@p.Id, document.getElementById('wishlist-btn'))" class="w-14 h-14 btn-outline-gold rounded-xl flex items-center justify-center text-xl">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+
+            <!-- Quick Buy -->
+            <a href="/Checkout" onclick="addToCartDetail(); return true;" class="block w-full text-center py-4 rounded-xl border border-gold text-gold hover:bg-gold hover:text-black transition-all font-bold text-lg">
+                <i class="fas fa-bolt ml-2"></i>
+                <span class="ar-text">شراء سريع</span>
+                <span class="en-text hidden">Quick Buy</span>
+            </a>
+
+            <!-- WhatsApp Order -->
+            <a href="https://wa.me/96512345678?text=مرحبا، أريد طلب عطر @(Uri.EscapeDataString(p.NameAr))"
+               target="_blank" class="flex items-center justify-center gap-3 py-4 rounded-xl bg-green-900 hover:bg-green-800 text-white font-bold transition-colors">
+                <i class="fab fa-whatsapp text-xl"></i>
+                <span class="ar-text">اطلب عبر واتساب</span>
+            </a>
+
+            <hr class="border-luxury-border" />
+
+            <!-- Description -->
+            <div>
+                <h3 class="text-gold font-bold text-lg mb-3 ar-text">وصف العطر</h3>
+                <p class="text-gray-300 leading-relaxed ar-text">@p.DescriptionAr</p>
+                <p class="text-gray-300 leading-relaxed en-text hidden">@p.DescriptionEn</p>
+            </div>
+
+            <!-- Features Icons -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center luxury-card rounded-xl p-4">
+                    <i class="fas fa-check-circle text-gold text-2xl mb-2"></i>
+                    <p class="text-xs text-gray-400 ar-text">أصل 100%</p>
+                </div>
+                <div class="text-center luxury-card rounded-xl p-4">
+                    <i class="fas fa-box text-gold text-2xl mb-2"></i>
+                    <p class="text-xs text-gray-400 ar-text">تغليف فاخر</p>
+                </div>
+                <div class="text-center luxury-card rounded-xl p-4">
+                    <i class="fas fa-undo text-gold text-2xl mb-2"></i>
+                    <p class="text-xs text-gray-400 ar-text">إرجاع مجاني</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SCENT PYRAMID ── -->
+    @if (Model.ScentNotes != null)
+    {
+        <section class="mt-20 py-16 bg-luxury-section rounded-3xl px-8">
+            <div class="text-center mb-12">
+                <p class="text-gold text-sm tracking-widest uppercase mb-2">تفاصيل العطر</p>
+                <h2 class="text-3xl font-black text-white ar-text">هرم العطر</h2>
+                <p class="text-gray-400 text-sm mt-2 ar-text">رحلة العطر من أول لمسة حتى آخر الليل</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <!-- Top Notes -->
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gold bg-opacity-20 border border-gold-dark rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-wind text-gold text-2xl"></i>
+                    </div>
+                    <h3 class="text-gold font-bold text-lg mb-1 ar-text">النوتات الأولى</h3>
+                    <p class="text-gray-500 text-xs mb-4 ar-text">تدوم 15-30 دقيقة</p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        @foreach (var note in (Model.ScentNotes.Top ?? new()))
+                        {
+                            <span class="scent-note-pill">@note</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Middle Notes -->
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gold bg-opacity-20 border border-gold-dark rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-heart text-gold text-2xl"></i>
+                    </div>
+                    <h3 class="text-gold font-bold text-lg mb-1 ar-text">النوتات الوسطى</h3>
+                    <p class="text-gray-500 text-xs mb-4 ar-text">قلب العطر - 2-4 ساعات</p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        @foreach (var note in (Model.ScentNotes.Middle ?? new()))
+                        {
+                            <span class="scent-note-pill">@note</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Base Notes -->
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gold bg-opacity-20 border border-gold-dark rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-anchor text-gold text-2xl"></i>
+                    </div>
+                    <h3 class="text-gold font-bold text-lg mb-1 ar-text">النوتات الأساسية</h3>
+                    <p class="text-gray-500 text-xs mb-4 ar-text">الثبات - 6-12+ ساعة</p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        @foreach (var note in (Model.ScentNotes.Base ?? new()))
+                        {
+                            <span class="scent-note-pill">@note</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pyramid Visual -->
+            <div class="max-w-sm mx-auto mt-12">
+                <svg viewBox="0 0 300 200" class="w-full" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Top -->
+                    <polygon points="150,10 190,70 110,70" fill="rgba(212,175,55,0.7)" />
+                    <text x="150" y="48" text-anchor="middle" fill="#0A0A0A" font-size="10" font-family="Cairo" font-weight="bold">أولى</text>
+                    <!-- Middle -->
+                    <polygon points="110,75 190,75 220,130 80,130" fill="rgba(212,175,55,0.5)"/>
+                    <text x="150" y="108" text-anchor="middle" fill="#0A0A0A" font-size="10" font-family="Cairo" font-weight="bold">وسطى</text>
+                    <!-- Base -->
+                    <polygon points="80,135 220,135 260,190 40,190" fill="rgba(212,175,55,0.3)"/>
+                    <text x="150" y="168" text-anchor="middle" fill="#D4AF37" font-size="11" font-family="Cairo" font-weight="bold">أساسية</text>
+                </svg>
+            </div>
+        </section>
+    }
+
+    <!-- ── REVIEWS ── -->
+    <section id="reviews" class="mt-20">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-black text-white ar-text">تقييمات العملاء</h2>
+            <button onclick="toggleReviewForm()" class="btn-gold px-6 py-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-star ml-2"></i>
+                <span class="ar-text">اكتب تقييماً</span>
+            </button>
+        </div>
+
+        <!-- Review Form -->
+        <div id="review-form" class="luxury-card rounded-2xl p-6 mb-8 border border-luxury-border hidden">
+            <h3 class="text-gold font-bold mb-4 ar-text">اكتب تقييمك</h3>
+            <div class="space-y-4">
+                <input type="text" id="reviewer-name" placeholder="اسمك *" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" />
+                <div class="flex gap-2 items-center">
+                    <span class="text-gray-400 text-sm ar-text">تقييمك:</span>
+                    <div class="flex gap-1">
+                        @for (int s = 1; s <= 5; s++)
+                        {
+                            <button onclick="setRating(@s)" class="rating-star text-2xl text-gray-600 hover:text-gold transition-colors cursor-pointer" data-value="@s">★</button>
+                        }
+                    </div>
+                </div>
+                <textarea id="review-comment" rows="3" placeholder="شاركنا تجربتك مع العطر..." class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm"></textarea>
+                <button onclick="submitReview(@p.Id)" class="btn-gold px-8 py-3 rounded-xl font-bold ar-text">
+                    <i class="fas fa-paper-plane ml-2"></i> إرسال التقييم
+                </button>
+            </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="space-y-4" id="reviews-list">
+            @foreach (var review in Model.Reviews)
+            {
+                <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-luxury-section border border-gold-dark rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-gold text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-white font-bold">@review.ReviewerName</p>
+                                <p class="text-gray-500 text-xs">@review.CreatedAt.ToString("dd/MM/yyyy")</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-0.5">
+                            @for (int s = 1; s <= 5; s++)
+                            {
+                                <i class="fas fa-star text-sm @(s <= review.Rating ? "text-gold" : "text-gray-700")"></i>
+                            }
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed mt-3">@review.Comment</p>
+                </div>
+            }
+            @if (!Model.Reviews.Any())
+            {
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fas fa-comment-slash text-3xl mb-3 opacity-30"></i>
+                    <p class="ar-text">لا توجد تقييمات بعد. كن أول من يقيّم هذا العطر!</p>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- ── RELATED PRODUCTS ── -->
+    @if (Model.RelatedProducts.Any())
+    {
+        <section class="mt-20">
+            <h2 class="text-3xl font-black text-white mb-8 ar-text">قد يعجبك أيضاً</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                @foreach (var rp in Model.RelatedProducts)
+                {
+                    <div class="luxury-card rounded-2xl overflow-hidden group">
+                        <div class="product-img-container h-44 bg-luxury-section">
+                            <img src="@rp.ImageUrl" alt="@rp.NameAr" class="w-full h-full object-cover"
+                                 onerror="this.src='/images/product-placeholder.svg'" />
+                        </div>
+                        <div class="p-4">
+                            <a href="/Product/Detail/@rp.Id">
+                                <h3 class="text-white font-bold text-sm group-hover:text-gold ar-text">@rp.NameAr</h3>
+                            </a>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="text-gold font-bold text-sm">@rp.PriceKWD.ToString("F3") KD</span>
+                                <button onclick="quickAddToCart(@rp.Id, '@rp.NameAr', @rp.PriceKWD)" class="btn-gold w-7 h-7 rounded-lg flex items-center justify-center text-xs">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
+<script>
+let selectedSize = '@(Model.Sizes?.FirstOrDefault()?.Size ?? "")';
+let selectedPrice = @(Model.Product?.PriceKWD.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0");
+let selectedRating = 5;
+
+function selectSize(size, price, btn) {
+    selectedSize = size;
+    selectedPrice = price;
+    document.getElementById('selected-price').textContent = price.toFixed(3) + ' KD';
+    document.querySelectorAll('.size-btn').forEach(b => {
+        b.classList.remove('border-gold', 'text-gold', 'bg-gold', 'bg-opacity-10');
+        b.classList.add('border-luxury-border', 'text-gray-400');
+    });
+    btn.classList.add('border-gold', 'text-gold', 'bg-gold', 'bg-opacity-10');
+    btn.classList.remove('border-luxury-border', 'text-gray-400');
+}
+
+function changeQty(delta) {
+    const input = document.getElementById('qty-input');
+    const val = parseInt(input.value) + delta;
+    if (val >= 1 && val <= 99) input.value = val;
+}
+
+function addToCartDetail() {
+    const qty = parseInt(document.getElementById('qty-input').value);
+    addToCart(@p.Id, '@p.NameAr', selectedSize, selectedPrice, qty);
+}
+
+function changeMainImage(src) {
+    document.getElementById('main-image').src = src;
+}
+
+function toggleReviewForm() {
+    document.getElementById('review-form').classList.toggle('hidden');
+}
+
+function setRating(val) {
+    selectedRating = val;
+    document.querySelectorAll('.rating-star').forEach((s, i) => {
+        s.style.color = i < val ? '#D4AF37' : '#4B5563';
+    });
+}
+
+// Initialize stars
+setRating(5);
+
+async function submitReview(productId) {
+    const name = document.getElementById('reviewer-name').value;
+    const comment = document.getElementById('review-comment').value;
+    if (!name || !comment) { showToast('يرجى ملء جميع الحقول', 'error'); return; }
+
+    const res = await fetch('/Product/AddReview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, reviewerName: name, comment, rating: selectedRating })
+    });
+    const data = await res.json();
+    if (data.success) {
+        showToast(data.message);
+        document.getElementById('review-form').classList.add('hidden');
+        location.reload();
+    }
+}
+</script>
+}

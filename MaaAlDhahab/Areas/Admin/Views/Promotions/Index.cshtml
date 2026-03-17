@@ -1,0 +1,75 @@
+@model List<Promotion>
+@{
+    ViewData["Title"] = "كوبونات الخصم";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <p class="text-gray-400 text-sm">@Model.Count كوبون مسجل</p>
+    <a href="/admin/promotions/create" class="btn-gold px-5 py-2 rounded-xl text-sm flex items-center gap-2">
+        <i class="fas fa-plus"></i> إنشاء كوبون جديد
+    </a>
+</div>
+
+<div class="admin-card">
+    <table>
+        <thead>
+            <tr>
+                <th>الكود</th>
+                <th>الوصف</th>
+                <th>نوع الخصم</th>
+                <th>القيمة</th>
+                <th>الحد الأدنى</th>
+                <th>الاستخدام</th>
+                <th>تنتهي في</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var promo in Model)
+            {
+                <tr>
+                    <td><span class="text-gold font-black text-lg tracking-widest">@promo.Code</span></td>
+                    <td class="text-gray-300 text-sm">@promo.DescriptionAr</td>
+                    <td><span class="badge badge-gold">@(promo.DiscountType == "Percentage" ? "نسبة %" : "مبلغ ثابت")</span></td>
+                    <td class="text-white font-bold">@(promo.DiscountType == "Percentage" ? promo.DiscountValue.ToString("F0") + "%" : promo.DiscountValue.ToString("F3") + " KD")</td>
+                    <td class="text-gray-400 text-sm">@(promo.MinOrderAmount.HasValue ? promo.MinOrderAmount.Value.ToString("F3") + " KD" : "-")</td>
+                    <td>
+                        <span class="text-white">@promo.UsageCount</span>
+                        <span class="text-gray-500">/@(promo.UsageLimit?.ToString() ?? "∞")</span>
+                    </td>
+                    <td class="text-gray-400 text-sm">@(promo.EndDate.HasValue ? promo.EndDate.Value.ToString("dd/MM/yyyy") : "-")</td>
+                    <td>
+                        <button onclick="togglePromo(@promo.Id, this)" class="badge @(promo.IsActive ? "badge-success" : "badge-danger") cursor-pointer hover:opacity-80 transition-opacity">
+                            @(promo.IsActive ? "نشط" : "متوقف")
+                        </button>
+                    </td>
+                    <td>
+                        <button onclick="deletePromo(@promo.Id, this.closest('tr'))" class="w-8 h-8 bg-red-900 bg-opacity-30 rounded-lg flex items-center justify-center hover:bg-red-900 transition-all">
+                            <i class="fas fa-trash text-red-400 text-xs"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+<script>
+async function togglePromo(id, btn) {
+    const res = await fetch(`/admin/promotions/toggle/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+        btn.textContent = data.isActive ? 'نشط' : 'متوقف';
+        btn.className = 'badge ' + (data.isActive ? 'badge-success' : 'badge-danger') + ' cursor-pointer hover:opacity-80 transition-opacity';
+    }
+}
+async function deletePromo(id, row) {
+    if (!confirm('حذف هذا الكوبون؟')) return;
+    const res = await fetch(`/admin/promotions/delete/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) row.remove();
+}
+</script>
+}

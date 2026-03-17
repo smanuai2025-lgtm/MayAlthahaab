@@ -1,0 +1,59 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "طلباتي";
+}
+
+<div class="max-w-5xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black text-white mb-8 ar-text">سجل <span class="gold-gradient">طلباتي</span></h1>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 luxury-card rounded-2xl border border-luxury-border">
+            <i class="fas fa-box-open text-5xl text-gray-600 mb-4"></i>
+            <h2 class="text-xl font-bold text-white mb-2 ar-text">لا توجد طلبات بعد</h2>
+            <p class="text-gray-400 mb-6 ar-text">ابدأ تسوقك واستمتع بأفخر العطور!</p>
+            <a href="/Shop" class="btn-gold px-8 py-3 rounded-xl font-bold inline-block ar-text">تسوق الآن</a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var order in Model)
+            {
+                <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <span class="text-gold font-black text-xl">@order.OrderNumber</span>
+                            <span class="text-gray-500 text-sm mr-3">@order.CreatedAt.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold border @(order.OrderStatus == "Delivered" ? "border-green-600 text-green-400" : order.OrderStatus == "Pending" ? "border-yellow-600 text-yellow-400" : "border-gold text-gold")">
+                                @(order.OrderStatus == "Pending" ? "معلق" : order.OrderStatus == "Processing" ? "جاري التحضير" : order.OrderStatus == "Shipped" ? "في الطريق" : order.OrderStatus == "Delivered" ? "تم التسليم" : "ملغي")
+                            </span>
+                            <span class="text-gold font-black">@order.Total.ToString("F3") KD</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 overflow-x-auto pb-2">
+                        @foreach (var item in order.OrderItems.Take(4))
+                        {
+                            <div class="flex-shrink-0 text-center">
+                                <div class="w-16 h-16 rounded-xl bg-luxury-section border border-luxury-border overflow-hidden">
+                                    <img src="@(item.Product?.ImageUrl ?? "/images/product-placeholder.svg")" class="w-full h-full object-cover"
+                                         onerror="this.src='/images/product-placeholder.svg'" />
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1 w-16 truncate">@item.ProductName</p>
+                            </div>
+                        }
+                        @if (order.OrderItems.Count > 4)
+                        {
+                            <div class="flex-shrink-0 w-16 h-16 rounded-xl bg-luxury-section border border-luxury-border flex items-center justify-center">
+                                <span class="text-gold font-bold text-sm">+@(order.OrderItems.Count - 4)</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

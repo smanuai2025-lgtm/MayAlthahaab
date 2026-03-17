@@ -1,0 +1,68 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "إنشاء حساب";
+}
+
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex flex-col items-center gap-2">
+                <svg viewBox="0 0 60 60" class="w-16 h-16" fill="none">
+                    <circle cx="30" cy="30" r="28" stroke="#D4AF37" stroke-width="1.5"/>
+                    <path d="M30 8 L35 20 L48 20 L38 28 L42 42 L30 34 L18 42 L22 28 L12 20 L25 20 Z" fill="#D4AF37" opacity="0.9"/>
+                </svg>
+                <span class="text-gold text-2xl font-black">ماء الذهب</span>
+            </a>
+        </div>
+
+        <div class="luxury-card rounded-2xl p-8 border border-luxury-border">
+            <h1 class="text-2xl font-black text-white mb-2 text-center ar-text">إنشاء حساب جديد</h1>
+            <p class="text-gray-400 text-sm text-center mb-2 ar-text">احصل على 50 نقطة ولاء مجاناً عند التسجيل! 🎁</p>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="bg-red-900 bg-opacity-30 border border-red-700 rounded-xl p-3 mb-4">
+                    <div asp-validation-summary="All" class="text-red-400 text-sm"></div>
+                </div>
+            }
+
+            <form method="post" asp-action="Register" class="space-y-4 mt-6">
+                @Html.AntiForgeryToken()
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">الاسم الكامل *</label>
+                    <input asp-for="FullNameAr" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="محمد أحمد" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">البريد الإلكتروني *</label>
+                    <input asp-for="Email" type="email" dir="ltr" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="email@example.com" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">رقم الهاتف *</label>
+                    <input asp-for="PhoneNumber" type="tel" dir="ltr" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="+965 xxxx xxxx" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">كلمة المرور *</label>
+                    <input asp-for="Password" type="password" dir="ltr" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" placeholder="6 أحرف على الأقل" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">تأكيد كلمة المرور *</label>
+                    <input asp-for="ConfirmPassword" type="password" dir="ltr" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1 ar-text">كود الإحالة (اختياري)</label>
+                    <input asp-for="ReferralCode" dir="ltr" class="w-full bg-luxury-section border border-luxury-border rounded-xl px-4 py-3 text-sm uppercase" placeholder="MAD#####" />
+                </div>
+
+                <button type="submit" class="btn-gold w-full py-4 rounded-xl font-bold text-lg ar-text">
+                    <i class="fas fa-user-plus ml-2"></i> إنشاء الحساب
+                </button>
+            </form>
+
+            <div class="text-center mt-6">
+                <p class="text-gray-400 text-sm ar-text">لديك حساب بالفعل؟
+                    <a href="/Account/Login" class="text-gold hover:underline font-bold">تسجيل الدخول</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

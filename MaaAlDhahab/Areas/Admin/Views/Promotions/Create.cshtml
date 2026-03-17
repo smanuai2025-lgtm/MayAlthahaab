@@ -1,0 +1,63 @@
+@model Promotion
+@{
+    ViewData["Title"] = "إنشاء كوبون خصم";
+}
+
+<div class="max-w-xl">
+    <form method="post" class="space-y-4">
+        @Html.AntiForgeryToken()
+        <div class="admin-card space-y-4">
+            <div>
+                <label class="text-gray-400 text-sm block mb-1">كود الخصم *</label>
+                <input asp-for="Code" dir="ltr" class="w-full uppercase" placeholder="WELCOME20" />
+            </div>
+            <div>
+                <label class="text-gray-400 text-sm block mb-1">الوصف بالعربية</label>
+                <input asp-for="DescriptionAr" class="w-full" placeholder="خصم 20% للعملاء الجدد" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">نوع الخصم</label>
+                    <select asp-for="DiscountType" class="w-full">
+                        <option value="Percentage">نسبة مئوية %</option>
+                        <option value="Fixed">مبلغ ثابت KD</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">قيمة الخصم</label>
+                    <input asp-for="DiscountValue" type="number" step="0.001" dir="ltr" class="w-full" />
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الحد الأدنى للطلب (KD)</label>
+                    <input asp-for="MinOrderAmount" type="number" step="0.001" dir="ltr" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">حد الاستخدام</label>
+                    <input asp-for="UsageLimit" type="number" dir="ltr" class="w-full" placeholder="فارغ = بلا حد" />
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">تاريخ البداية</label>
+                    <input asp-for="StartDate" type="date" dir="ltr" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">تاريخ الانتهاء</label>
+                    <input asp-for="EndDate" type="date" dir="ltr" class="w-full" />
+                </div>
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input asp-for="IsActive" type="checkbox" class="w-5 h-5" checked />
+                <span class="text-gray-300">نشط مباشرة</span>
+            </label>
+        </div>
+        <div class="flex gap-3">
+            <button type="submit" class="btn-gold px-8 py-3 rounded-xl font-bold">
+                <i class="fas fa-save ml-2"></i> حفظ الكوبون
+            </button>
+            <a href="/admin/promotions" class="px-8 py-3 rounded-xl border border-luxury-border text-gray-400 hover:text-gold transition-all">إلغاء</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"]) | لوحة تحكم ماء الذهب</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: { DEFAULT: '#D4AF37', light: '#E8C84A', dark: '#B8960A' },
+                        luxury: { black: '#0A0A0A', card: '#121212', section: '#1A1A1A', border: '#2A2A2A' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Cairo', Arial, sans-serif; }
+        body { background-color: #0A0A0A; color: #E8E0D0; }
+        .sidebar-link { @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gold hover:bg-luxury-section transition-all text-sm; }
+        .sidebar-link.active { @apply text-gold bg-gold bg-opacity-10 border border-gold border-opacity-20; }
+        .admin-card { background: #121212; border: 1px solid #2A2A2A; border-radius: 16px; padding: 24px; }
+        .btn-gold { background: linear-gradient(135deg, #D4AF37, #C9A227); color: #0A0A0A; font-weight: 700; border-radius: 8px; padding: 8px 20px; transition: all 0.3s; }
+        .btn-gold:hover { opacity: 0.9; transform: scale(1.02); }
+        input, select, textarea { background: #1A1A1A !important; border-color: #2A2A2A !important; color: #E8E0D0 !important; border-radius: 8px; padding: 8px 12px; width: 100%; border: 1px solid #2A2A2A; }
+        input:focus, select:focus { border-color: #D4AF37 !important; outline: none !important; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #1A1A1A; color: #D4AF37; padding: 12px; text-align: right; border-bottom: 1px solid #2A2A2A; font-size: 0.85rem; }
+        td { padding: 12px; border-bottom: 1px solid #1A1A1A; font-size: 0.9rem; vertical-align: middle; }
+        tr:hover td { background: #151515; }
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .badge-success { background: rgba(16,185,129,0.2); color: #10B981; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-warning { background: rgba(245,158,11,0.2); color: #F59E0B; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-danger { background: rgba(239,68,68,0.2); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+        .badge-gold { background: rgba(212,175,55,0.2); color: #D4AF37; border: 1px solid rgba(212,175,55,0.3); }
+        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #0A0A0A; } ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 3px; }
+    </style>
+</head>
+<body class="dark">
+<div class="flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-luxury-card border-l border-luxury-border flex flex-col overflow-y-auto flex-shrink-0" id="sidebar">
+        <!-- Logo -->
+        <div class="p-5 border-b border-luxury-border">
+            <a href="/admin" class="flex items-center gap-3">
+                <svg viewBox="0 0 40 40" class="w-10 h-10" fill="none">
+                    <circle cx="20" cy="20" r="18" stroke="#D4AF37" stroke-width="1.5"/>
+                    <path d="M20 5 L23 14 L33 14 L25 19 L28 28 L20 23 L12 28 L15 19 L7 14 L17 14 Z" fill="#D4AF37" opacity="0.9"/>
+                </svg>
+                <div>
+                    <div class="text-gold font-black text-lg leading-none">ماء الذهب</div>
+                    <div class="text-gray-500 text-xs">لوحة التحكم</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Nav -->
+        <nav class="p-4 space-y-1 flex-1">
+            <p class="text-gray-600 text-xs uppercase tracking-widest px-4 py-2">الرئيسية</p>
+            <a href="/admin" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                <i class="fas fa-tachometer-alt w-5"></i> لوحة التحكم
+            </a>
+
+            <p class="text-gray-600 text-xs uppercase tracking-widest px-4 py-2 mt-4">المتجر</p>
+            <a href="/admin/products" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")">
+                <i class="fas fa-spray-can w-5"></i> المنتجات
+            </a>
+            <a href="/admin/categories" class="sidebar-link">
+                <i class="fas fa-tags w-5"></i> الفئات
+            </a>
+            <a href="/admin/orders" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" ? "active" : "")">
+                <i class="fas fa-box w-5"></i> الطلبات
+            </a>
+
+            <p class="text-gray-600 text-xs uppercase tracking-widest px-4 py-2 mt-4">التسويق</p>
+            <a href="/admin/promotions" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Promotions" ? "active" : "")">
+                <i class="fas fa-percentage w-5"></i> العروض والكوبونات
+            </a>
+            <a href="/admin/promotions/banners" class="sidebar-link">
+                <i class="fas fa-images w-5"></i> البانرات
+            </a>
+
+            <p class="text-gray-600 text-xs uppercase tracking-widest px-4 py-2 mt-4">الأعضاء</p>
+            <a href="/admin/users" class="sidebar-link">
+                <i class="fas fa-users w-5"></i> المستخدمون
+            </a>
+
+            <div class="mt-6 pt-4 border-t border-luxury-border">
+                <a href="/" class="sidebar-link">
+                    <i class="fas fa-store w-5"></i> المتجر الرئيسي
+                </a>
+                <form method="post" action="/Account/Logout">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="sidebar-link w-full text-right text-red-400 hover:text-red-300">
+                        <i class="fas fa-sign-out-alt w-5"></i> تسجيل الخروج
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Bar -->
+        <header class="bg-luxury-card border-b border-luxury-border px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div>
+                <h1 class="text-xl font-bold text-white">@ViewData["Title"]</h1>
+                <p class="text-gray-500 text-xs">@DateTime.Now.ToString("dddd، d MMMM yyyy", new System.Globalization.CultureInfo("ar-KW"))</p>
+            </div>
+            <div class="flex items-center gap-4">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="bg-green-900 bg-opacity-50 border border-green-600 text-green-400 px-4 py-2 rounded-xl text-sm">
+                        ✓ @TempData["Success"]
+                    </div>
+                }
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 bg-gold rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-black text-sm"></i>
+                    </div>
+                    <div class="hidden md:block">
+                        <p class="text-white text-sm font-bold">المدير</p>
+                        <p class="text-gray-500 text-xs">Admin</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-6">
+            @RenderBody()
+        </main>
+    </div>
+</div>
+
+<script src="/js/admin.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

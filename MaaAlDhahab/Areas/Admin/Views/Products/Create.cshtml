@@ -1,0 +1,138 @@
+@model Product
+@{
+    ViewData["Title"] = "إضافة منتج جديد";
+}
+
+<div class="max-w-3xl">
+    <form method="post" class="space-y-6">
+        @Html.AntiForgeryToken()
+
+        <div class="admin-card">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-info-circle text-gold"></i> المعلومات الأساسية
+            </h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الاسم بالعربية *</label>
+                    <input asp-for="NameAr" class="w-full" placeholder="مثال: عبدالرحمن" />
+                    <span asp-validation-for="NameAr" class="text-red-400 text-xs"></span>
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الاسم بالإنجليزية *</label>
+                    <input asp-for="NameEn" class="w-full" dir="ltr" placeholder="e.g. Abdul Rahman" />
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-gray-400 text-sm block mb-1">الوصف بالعربية</label>
+                    <textarea asp-for="DescriptionAr" rows="3" class="w-full" placeholder="وصف العطر..."></textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-gray-400 text-sm block mb-1">الوصف بالإنجليزية</label>
+                    <textarea asp-for="DescriptionEn" rows="3" class="w-full" dir="ltr" placeholder="Fragrance description..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-tags text-gold"></i> التصنيف والسعر
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الفئة *</label>
+                    <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="w-full">
+                        <option value="">اختر الفئة</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">السعر (KD) *</label>
+                    <input asp-for="PriceKWD" type="number" step="0.001" class="w-full" dir="ltr" placeholder="0.000" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">السعر الأصلي (KD)</label>
+                    <input asp-for="OriginalPriceKWD" type="number" step="0.001" class="w-full" dir="ltr" placeholder="اختياري" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الجنس</label>
+                    <select asp-for="Gender" class="w-full">
+                        <option value="">اختر</option>
+                        <option value="Female">نسائي</option>
+                        <option value="Male">رجالي</option>
+                        <option value="Unisex">يونيسكس</option>
+                        <option value="Kids">أطفال</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">التركيز</label>
+                    <select asp-for="Concentration" class="w-full">
+                        <option value="">اختر</option>
+                        <option value="EDP">Eau de Parfum</option>
+                        <option value="EDT">Eau de Toilette</option>
+                        <option value="Parfum">Parfum</option>
+                        <option value="Bukhoor">بخور</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الكمية في المخزون</label>
+                    <input asp-for="StockQuantity" type="number" class="w-full" dir="ltr" value="100" />
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-image text-gold"></i> الصور
+            </h2>
+            <div>
+                <label class="text-gray-400 text-sm block mb-1">رابط الصورة الرئيسية</label>
+                <input asp-for="ImageUrl" class="w-full" dir="ltr" placeholder="/images/products/my-perfume.jpg" />
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-flask text-gold"></i> نوتات العطر (JSON)
+            </h2>
+            <textarea asp-for="ScentNotesJson" rows="4" dir="ltr" class="w-full font-mono text-sm"
+                      placeholder='{"top": ["Bergamot", "Lemon"], "middle": ["Rose", "Jasmine"], "base": ["Musk", "Amber"]}'></textarea>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-white font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-ruler text-gold"></i> الأحجام والأسعار (JSON)
+            </h2>
+            <textarea asp-for="SizesJson" rows="3" dir="ltr" class="w-full font-mono text-sm"
+                      placeholder='[{"size": "65ml", "price": 5.000}, {"size": "75ml", "price": 7.000}]'></textarea>
+        </div>
+
+        <div class="admin-card">
+            <h2 class="text-white font-bold mb-4">إعدادات العرض</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input asp-for="IsFeatured" type="checkbox" class="w-5 h-5" />
+                    <span class="text-gray-300">مميز</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input asp-for="IsNewArrival" type="checkbox" class="w-5 h-5" />
+                    <span class="text-gray-300">وصل حديثاً</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input asp-for="IsBestSeller" type="checkbox" class="w-5 h-5" />
+                    <span class="text-gray-300">الأكثر مبيعاً</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input asp-for="IsActive" type="checkbox" class="w-5 h-5" checked />
+                    <span class="text-gray-300">نشط</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <button type="submit" class="btn-gold px-8 py-3 rounded-xl font-bold">
+                <i class="fas fa-save ml-2"></i> حفظ المنتج
+            </button>
+            <a href="/admin/products" class="px-8 py-3 rounded-xl border border-luxury-border text-gray-400 hover:border-gold hover:text-gold transition-all">
+                إلغاء
+            </a>
+        </div>
+    </form>
+</div>

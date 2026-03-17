@@ -1,0 +1,38 @@
+@model List<Category>
+@{
+    ViewData["Title"] = "الفئات";
+}
+
+<div class="admin-card">
+    <table>
+        <thead>
+            <tr>
+                <th>الاسم بالعربية</th>
+                <th>الاسم بالإنجليزية</th>
+                <th>الأيقونة</th>
+                <th>الترتيب</th>
+                <th>عدد المنتجات</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in Model)
+            {
+                <tr>
+                    <td class="text-white font-bold">@cat.NameAr</td>
+                    <td class="text-gray-300">@cat.NameEn</td>
+                    <td><i class="@(cat.IconClass ?? "fas fa-tag") text-gold"></i></td>
+                    <td class="text-gray-400">@cat.SortOrder</td>
+                    <td>
+                        <span class="badge badge-gold">@cat.Products.Count منتج</span>
+                    </td>
+                    <td>
+                        <span class="badge @(cat.IsActive ? "badge-success" : "badge-danger")">
+                            @(cat.IsActive ? "نشط" : "مخفي")
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

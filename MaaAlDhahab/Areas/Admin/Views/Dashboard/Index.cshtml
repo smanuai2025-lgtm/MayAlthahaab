@@ -1,0 +1,159 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "لوحة التحكم";
+}
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="admin-card">
+        <div class="flex items-start justify-between mb-4">
+            <div>
+                <p class="text-gray-400 text-sm">الطلبات الكلية</p>
+                <p class="text-3xl font-black text-white mt-1">@Model.TotalOrders</p>
+            </div>
+            <div class="w-12 h-12 bg-gold bg-opacity-20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-box text-gold text-xl"></i>
+            </div>
+        </div>
+        <p class="text-green-400 text-sm"><i class="fas fa-arrow-up ml-1"></i>@Model.TodayOrders اليوم</p>
+    </div>
+
+    <div class="admin-card">
+        <div class="flex items-start justify-between mb-4">
+            <div>
+                <p class="text-gray-400 text-sm">الإيرادات الكلية</p>
+                <p class="text-3xl font-black text-gold mt-1">@Model.TotalRevenue.ToString("F3")</p>
+            </div>
+            <div class="w-12 h-12 bg-gold bg-opacity-20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-coins text-gold text-xl"></i>
+            </div>
+        </div>
+        <p class="text-gray-400 text-sm">KD هذا الشهر: @Model.MonthlyRevenue.ToString("F3")</p>
+    </div>
+
+    <div class="admin-card">
+        <div class="flex items-start justify-between mb-4">
+            <div>
+                <p class="text-gray-400 text-sm">المنتجات النشطة</p>
+                <p class="text-3xl font-black text-white mt-1">@Model.TotalProducts</p>
+            </div>
+            <div class="w-12 h-12 bg-gold bg-opacity-20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-spray-can text-gold text-xl"></i>
+            </div>
+        </div>
+        <a href="/admin/products" class="text-gold text-sm hover:underline">عرض المنتجات ←</a>
+    </div>
+
+    <div class="admin-card">
+        <div class="flex items-start justify-between mb-4">
+            <div>
+                <p class="text-gray-400 text-sm">العملاء المسجلون</p>
+                <p class="text-3xl font-black text-white mt-1">@Model.TotalCustomers</p>
+            </div>
+            <div class="w-12 h-12 bg-gold bg-opacity-20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-users text-gold text-xl"></i>
+            </div>
+        </div>
+        <p class="text-yellow-400 text-sm"><i class="fas fa-clock ml-1"></i>@Model.PendingOrders طلبات معلقة</p>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+    <!-- Recent Orders -->
+    <div class="lg:col-span-2 admin-card">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg font-bold text-white">أحدث الطلبات</h2>
+            <a href="/admin/orders" class="text-gold text-sm hover:underline">عرض الكل</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الطلب</th>
+                        <th>العميل</th>
+                        <th>الإجمالي</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        <tr>
+                            <td><span class="text-gold font-bold">@order.OrderNumber</span></td>
+                            <td class="text-white">@order.CustomerName</td>
+                            <td class="text-gold font-bold">@order.Total.ToString("F3") KD</td>
+                            <td>
+                                <span class="badge @(order.OrderStatus == "Delivered" ? "badge-success" : order.OrderStatus == "Pending" ? "badge-warning" : "badge-gold")">
+                                    @(order.OrderStatus == "Pending" ? "معلق" : order.OrderStatus == "Processing" ? "جاري" : order.OrderStatus == "Shipped" ? "مشحون" : order.OrderStatus == "Delivered" ? "مُسلَّم" : "ملغي")
+                                </span>
+                            </td>
+                            <td class="text-gray-400 text-xs">@order.CreatedAt.ToString("dd/MM/yy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="admin-card">
+        <h2 class="text-lg font-bold text-white mb-6">أفضل المنتجات</h2>
+        <div class="space-y-4">
+            @foreach (var product in Model.TopProducts)
+            {
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg overflow-hidden bg-luxury-section flex-shrink-0">
+                        <img src="@product.ImageUrl" class="w-full h-full object-cover"
+                             onerror="this.src='/images/product-placeholder.svg'" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white text-sm font-bold truncate">@product.NameAr</p>
+                        <div class="flex items-center gap-1 mt-0.5">
+                            <i class="fas fa-star text-gold text-xs"></i>
+                            <span class="text-gray-400 text-xs">@product.Rating.ToString("F1") (@product.ReviewCount)</span>
+                        </div>
+                    </div>
+                    <span class="text-gold text-sm font-bold flex-shrink-0">@product.PriceKWD.ToString("F3") KD</span>
+                </div>
+            }
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-luxury-border">
+            <h3 class="text-white font-bold mb-4 text-sm">إجراءات سريعة</h3>
+            <div class="space-y-2">
+                <a href="/admin/products/create" class="flex items-center gap-2 btn-gold px-4 py-2 rounded-lg text-sm w-full justify-center">
+                    <i class="fas fa-plus"></i> إضافة منتج جديد
+                </a>
+                <a href="/admin/promotions/create" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm w-full justify-center border border-gold text-gold hover:bg-gold hover:text-black transition-all">
+                    <i class="fas fa-percentage"></i> إنشاء كود خصم
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Marketing Campaign Creator -->
+<div class="admin-card mt-6">
+    <div class="flex items-center gap-3 mb-6">
+        <i class="fas fa-bullhorn text-gold text-2xl"></i>
+        <h2 class="text-lg font-bold text-white">منشئ الحملة التسويقية</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-luxury-section border border-luxury-border rounded-xl p-5 text-center hover:border-gold transition-colors cursor-pointer">
+            <i class="fas fa-tag text-gold text-3xl mb-3"></i>
+            <h3 class="text-white font-bold mb-1">عرض محدود المدة</h3>
+            <p class="text-gray-400 text-xs">Flash Sale بخصومات كبيرة</p>
+        </div>
+        <div class="bg-luxury-section border border-luxury-border rounded-xl p-5 text-center hover:border-gold transition-colors cursor-pointer">
+            <i class="fas fa-envelope text-gold text-3xl mb-3"></i>
+            <h3 class="text-white font-bold mb-1">حملة البريد الإلكتروني</h3>
+            <p class="text-gray-400 text-xs">إرسال للمشتركين</p>
+        </div>
+        <div class="bg-luxury-section border border-luxury-border rounded-xl p-5 text-center hover:border-gold transition-colors cursor-pointer">
+            <i class="fas fa-bell text-gold text-3xl mb-3"></i>
+            <h3 class="text-white font-bold mb-1">إشعار Push</h3>
+            <p class="text-gray-400 text-xs">إشعار فوري للعملاء</p>
+        </div>
+    </div>
+</div>

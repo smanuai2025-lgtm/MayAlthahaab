@@ -1,0 +1,90 @@
+@model Order
+@{
+    ViewData["Title"] = "طلب #" + Model.OrderNumber;
+}
+
+<div class="max-w-4xl">
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Customer Info -->
+        <div class="admin-card">
+            <h3 class="text-gold font-bold mb-4">معلومات العميل</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-400">الاسم</span><span class="text-white">@Model.CustomerName</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">البريد</span><span class="text-white" dir="ltr">@Model.CustomerEmail</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">الهاتف</span><span class="text-white" dir="ltr">@Model.CustomerPhone</span></div>
+            </div>
+        </div>
+
+        <!-- Order Info -->
+        <div class="admin-card">
+            <h3 class="text-gold font-bold mb-4">تفاصيل الطلب</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-400">رقم الطلب</span><span class="text-gold font-bold">@Model.OrderNumber</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">طريقة الدفع</span><span class="text-white">@Model.PaymentMethod</span></div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">حالة الطلب</span>
+                    <select onchange="updateOrderStatus(@Model.Id, this.value)" class="bg-luxury-section border border-luxury-border rounded px-2 py-1 text-xs">
+                        <option value="Pending" @(Model.OrderStatus == "Pending" ? "selected" : "")>معلق</option>
+                        <option value="Processing" @(Model.OrderStatus == "Processing" ? "selected" : "")>جاري</option>
+                        <option value="Shipped" @(Model.OrderStatus == "Shipped" ? "selected" : "")>مشحون</option>
+                        <option value="Delivered" @(Model.OrderStatus == "Delivered" ? "selected" : "")>مُسلَّم</option>
+                        <option value="Cancelled" @(Model.OrderStatus == "Cancelled" ? "selected" : "")>ملغي</option>
+                    </select>
+                </div>
+                <div class="flex justify-between"><span class="text-gray-400">الإجمالي</span><span class="text-gold font-black text-lg">@Model.Total.ToString("F3") KD</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Address -->
+    <div class="admin-card mb-6">
+        <h3 class="text-gold font-bold mb-3">عنوان التوصيل</h3>
+        <p class="text-white">@Model.Governorate، @Model.Area، القطعة @Model.Block، شارع @Model.Street، @Model.HouseNumber</p>
+        @if (!string.IsNullOrEmpty(Model.AddressNotes))
+        {
+            <p class="text-gray-400 text-sm mt-1">ملاحظة: @Model.AddressNotes</p>
+        }
+    </div>
+
+    <!-- Items -->
+    <div class="admin-card">
+        <h3 class="text-gold font-bold mb-4">المنتجات</h3>
+        <table>
+            <thead><tr><th>المنتج</th><th>الحجم</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+            <tbody>
+                @foreach (var item in Model.OrderItems)
+                {
+                    <tr>
+                        <td class="text-white">@item.ProductName</td>
+                        <td class="text-gray-400">@item.Size</td>
+                        <td class="text-gray-300">@item.Quantity</td>
+                        <td class="text-gray-300">@item.UnitPrice.ToString("F3") KD</td>
+                        <td class="text-gold font-bold">@item.Total.ToString("F3") KD</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="mt-4 pt-4 border-t border-luxury-border space-y-1 text-sm text-right">
+            <div class="flex justify-between"><span class="text-gray-400">المجموع</span><span class="text-white">@Model.SubTotal.ToString("F3") KD</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">التوصيل</span><span class="text-white">@Model.DeliveryFee.ToString("F3") KD</span></div>
+            @if (Model.Discount > 0) {
+                <div class="flex justify-between"><span class="text-green-400">الخصم</span><span class="text-green-400">-@Model.Discount.ToString("F3") KD</span></div>
+            }
+            <div class="flex justify-between text-lg font-black"><span class="text-white">الإجمالي</span><span class="text-gold">@Model.Total.ToString("F3") KD</span></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+async function updateOrderStatus(id, status) {
+    const res = await fetch('/admin/orders/updatestatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id, status })
+    });
+    const data = await res.json();
+    if (data.success) showAdminToast('تم تحديث الحالة');
+}
+</script>
+}

@@ -1,0 +1,106 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = "ملفي الشخصي";
+}
+
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="grid md:grid-cols-3 gap-8">
+        <!-- Sidebar -->
+        <div class="space-y-4">
+            <div class="luxury-card rounded-2xl p-6 border border-luxury-border text-center">
+                <div class="w-20 h-20 bg-luxury-section border-2 border-gold rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user text-gold text-3xl"></i>
+                </div>
+                <h2 class="text-white font-black text-xl">@Model.FullNameAr</h2>
+                <p class="text-gray-400 text-sm">@Model.Email</p>
+                <div class="mt-4 p-3 bg-gold bg-opacity-10 rounded-xl border border-gold-dark">
+                    <p class="text-gold text-sm font-bold ar-text">نقاط الولاء</p>
+                    <p class="text-gold text-2xl font-black">@Model.LoyaltyPoints</p>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.ReferralCode))
+                {
+                    <div class="mt-3 p-3 bg-luxury-section rounded-xl">
+                        <p class="text-gray-400 text-xs ar-text">كود الإحالة الخاص بك</p>
+                        <p class="text-gold font-black tracking-widest">@Model.ReferralCode</p>
+                        <button onclick="copyCode('@Model.ReferralCode')" class="text-xs text-gray-500 hover:text-gold mt-1 ar-text">
+                            <i class="fas fa-copy ml-1"></i> نسخ
+                        </button>
+                    </div>
+                }
+            </div>
+            <nav class="luxury-card rounded-2xl p-4 border border-luxury-border space-y-1">
+                <a href="/Account/Profile" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gold bg-opacity-10 text-gold text-sm">
+                    <i class="fas fa-user w-5"></i> الملف الشخصي
+                </a>
+                <a href="/Account/OrderHistory" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-luxury-section text-gray-400 hover:text-white transition-colors text-sm">
+                    <i class="fas fa-box w-5"></i> طلباتي
+                </a>
+                <a href="/Cart" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-luxury-section text-gray-400 hover:text-white transition-colors text-sm">
+                    <i class="fas fa-heart w-5"></i> المفضلة
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="md:col-span-2 space-y-6">
+            <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                <h3 class="text-gold font-bold text-lg mb-4 ar-text">معلوماتي الشخصية</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between border-b border-luxury-border pb-3">
+                        <span class="text-gray-400 ar-text">الاسم</span>
+                        <span class="text-white">@Model.FullNameAr</span>
+                    </div>
+                    <div class="flex justify-between border-b border-luxury-border pb-3">
+                        <span class="text-gray-400 ar-text">البريد الإلكتروني</span>
+                        <span class="text-white" dir="ltr">@Model.Email</span>
+                    </div>
+                    <div class="flex justify-between border-b border-luxury-border pb-3">
+                        <span class="text-gray-400 ar-text">رقم الهاتف</span>
+                        <span class="text-white" dir="ltr">@(Model.PhoneNumber ?? "-")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400 ar-text">تاريخ الانضمام</span>
+                        <span class="text-white">@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loyalty Info -->
+            <div class="luxury-card rounded-2xl p-6 border border-luxury-border">
+                <h3 class="text-gold font-bold text-lg mb-4 ar-text">برنامج الولاء</h3>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="text-center luxury-card rounded-xl p-4">
+                        <i class="fas fa-star text-gold text-2xl mb-2"></i>
+                        <p class="text-2xl font-black text-gold">@Model.LoyaltyPoints</p>
+                        <p class="text-gray-400 text-xs ar-text">نقطة</p>
+                    </div>
+                    <div class="text-center luxury-card rounded-xl p-4">
+                        <i class="fas fa-box text-gold text-2xl mb-2"></i>
+                        <p class="text-2xl font-black text-white">@Model.Orders.Count</p>
+                        <p class="text-gray-400 text-xs ar-text">طلب</p>
+                    </div>
+                    <div class="text-center luxury-card rounded-xl p-4">
+                        <i class="fas fa-crown text-gold text-2xl mb-2"></i>
+                        <p class="text-2xl font-black text-white">عادي</p>
+                        <p class="text-gray-400 text-xs ar-text">المستوى</p>
+                    </div>
+                </div>
+                <div class="bg-luxury-section rounded-xl p-4">
+                    <p class="text-sm text-gray-400 ar-text">اجمع 500 نقطة وارتقِ لمستوى <span class="text-gold font-bold">ذهبي</span> واحصل على خصومات حصرية!</p>
+                    <div class="w-full bg-luxury-border rounded-full h-2 mt-3">
+                        <div class="bg-gold h-2 rounded-full" style="width: @(Math.Min(100, (Model.LoyaltyPoints * 100) / 500))%"></div>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">@Model.LoyaltyPoints / 500 نقطة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function copyCode(code) {
+    navigator.clipboard.writeText(code).then(() => showToast('تم نسخ الكود! ' + code));
+}
+</script>
+}

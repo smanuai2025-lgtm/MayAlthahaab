@@ -1,0 +1,56 @@
+@model Banner
+@{
+    ViewData["Title"] = "إضافة بانر";
+}
+
+<div class="max-w-xl">
+    <form method="post" class="space-y-4">
+        @Html.AntiForgeryToken()
+        <div class="admin-card space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">العنوان (عربي)</label>
+                    <input asp-for="TitleAr" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">العنوان (إنجليزي)</label>
+                    <input asp-for="TitleEn" dir="ltr" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الوصف (عربي)</label>
+                    <input asp-for="SubtitleAr" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">رابط البانر</label>
+                    <input asp-for="LinkUrl" dir="ltr" class="w-full" placeholder="/Shop" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">نص الزر (عربي)</label>
+                    <input asp-for="ButtonTextAr" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الموقع</label>
+                    <select asp-for="Position" class="w-full">
+                        <option value="Hero">Hero - الرئيسية</option>
+                        <option value="Promo">Promo - ترويجي</option>
+                        <option value="Sidebar">Sidebar - جانبي</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">الترتيب</label>
+                    <input asp-for="SortOrder" type="number" class="w-full" value="1" />
+                </div>
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input asp-for="IsActive" type="checkbox" class="w-5 h-5" checked />
+                <span class="text-gray-300">نشط</span>
+            </label>
+        </div>
+        <div class="flex gap-3">
+            <button type="submit" class="btn-gold px-8 py-3 rounded-xl font-bold">
+                <i class="fas fa-save ml-2"></i> حفظ البانر
+            </button>
+            <a href="/admin/promotions/banners" class="px-8 py-3 rounded-xl border border-luxury-border text-gray-400 hover:text-gold transition-all">إلغاء</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,312 @@
+@model ShopViewModel
+@{
+    ViewData["Title"] = "المتجر";
+}
+
+<!-- Shop Header -->
+<section class="py-16 bg-luxury-section border-b border-luxury-border">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-4xl font-black text-white ar-text">متجر <span class="gold-gradient">ماء الذهب</span></h1>
+                <h1 class="text-4xl font-black text-white en-text hidden">Maa Al Dhahab <span class="gold-gradient">Shop</span></h1>
+                <p class="text-gray-400 mt-2 ar-text">@Model.TotalCount عطر فاخر ينتظرك</p>
+                <p class="text-gray-400 mt-2 en-text hidden">@Model.TotalCount luxury fragrances await you</p>
+            </div>
+            <!-- Sort -->
+            <div class="flex items-center gap-3">
+                <label class="text-gray-400 text-sm ar-text">ترتيب حسب:</label>
+                <select id="sort-select" onchange="applySort(this.value)" class="bg-luxury-card border border-luxury-border rounded-xl px-4 py-2 text-sm focus:border-gold cursor-pointer">
+                    <option value="newest" @(Model.Filter.SortBy == "newest" ? "selected" : "")>الأحدث</option>
+                    <option value="price_asc" @(Model.Filter.SortBy == "price_asc" ? "selected" : "")>السعر: الأقل</option>
+                    <option value="price_desc" @(Model.Filter.SortBy == "price_desc" ? "selected" : "")>السعر: الأعلى</option>
+                    <option value="rating" @(Model.Filter.SortBy == "rating" ? "selected" : "")>التقييم</option>
+                    <option value="bestseller" @(Model.Filter.SortBy == "bestseller" ? "selected" : "")>الأكثر مبيعاً</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+    <div class="flex flex-col lg:flex-row gap-8">
+
+        <!-- ── SIDEBAR FILTERS ── -->
+        <aside class="lg:w-64 flex-shrink-0">
+            <div class="sticky top-24 space-y-6">
+                <!-- Mobile filter toggle -->
+                <button onclick="toggleFilters()" class="w-full flex items-center justify-between luxury-card rounded-xl px-4 py-3 border border-luxury-border lg:hidden">
+                    <span class="text-white font-bold ar-text"><i class="fas fa-filter text-gold ml-2"></i>الفلاتر</span>
+                    <i class="fas fa-chevron-down text-gold text-sm" id="filter-chevron"></i>
+                </button>
+
+                <div id="filters-panel" class="space-y-6 hidden lg:block">
+                    <!-- Search -->
+                    <div class="luxury-card rounded-xl p-5 border border-luxury-border">
+                        <h3 class="text-gold font-bold mb-4 ar-text">البحث</h3>
+                        <input type="text" id="search-filter" placeholder="اسم العطر..." value="@Model.Filter.Search"
+                               class="w-full bg-luxury-section border border-luxury-border rounded-lg px-4 py-2 text-sm"
+                               oninput="debounceSearch(this.value)" />
+                    </div>
+
+                    <!-- Category -->
+                    <div class="luxury-card rounded-xl p-5 border border-luxury-border">
+                        <h3 class="text-gold font-bold mb-4 ar-text">الفئة</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="radio" name="category" value="" onchange="applyFilter()" class="text-gold" @(Model.Filter.CategoryId == null ? "checked" : "") />
+                                <span class="text-sm text-gray-300 ar-text">الكل</span>
+                            </label>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="radio" name="category" value="@cat.Id" onchange="applyFilter()" class="text-gold" @(Model.Filter.CategoryId == cat.Id ? "checked" : "") />
+                                    <span class="text-sm text-gray-300 ar-text">@cat.NameAr</span>
+                                    <span class="text-sm text-gray-300 en-text hidden">@cat.NameEn</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="luxury-card rounded-xl p-5 border border-luxury-border">
+                        <h3 class="text-gold font-bold mb-4 ar-text">الجنس</h3>
+                        <div class="space-y-2">
+                            @{
+                                var genders = new[] {
+                                    ("", "الكل", "All"),
+                                    ("Female", "نسائي", "Women"),
+                                    ("Male", "رجالي", "Men"),
+                                    ("Unisex", "يونيسكس", "Unisex"),
+                                    ("Kids", "أطفال", "Kids")
+                                };
+                            }
+                            @foreach (var (val, ar, en) in genders)
+                            {
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="radio" name="gender" value="@val" onchange="applyFilter()" class="text-gold"
+                                           @(Model.Filter.Gender == val || (val == "" && Model.Filter.Gender == null) ? "checked" : "") />
+                                    <span class="text-sm text-gray-300 ar-text">@ar</span>
+                                    <span class="text-sm text-gray-300 en-text hidden">@en</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="luxury-card rounded-xl p-5 border border-luxury-border">
+                        <h3 class="text-gold font-bold mb-4 ar-text">النطاق السعري (KD)</h3>
+                        <div class="flex gap-2 items-center">
+                            <input type="number" id="min-price" placeholder="من" min="0" max="50" step="0.5" value="@Model.Filter.MinPrice"
+                                   class="w-full bg-luxury-section border border-luxury-border rounded-lg px-3 py-2 text-sm" />
+                            <span class="text-gray-500">-</span>
+                            <input type="number" id="max-price" placeholder="إلى" min="0" max="50" step="0.5" value="@Model.Filter.MaxPrice"
+                                   class="w-full bg-luxury-section border border-luxury-border rounded-lg px-3 py-2 text-sm" />
+                        </div>
+                        <button onclick="applyPriceFilter()" class="btn-gold w-full mt-3 py-2 rounded-lg text-sm font-bold ar-text">تطبيق</button>
+                    </div>
+
+                    <!-- Clear Filters -->
+                    <button onclick="clearFilters()" class="w-full btn-outline-gold py-3 rounded-xl text-sm font-bold ar-text">
+                        <i class="fas fa-times ml-2"></i> مسح الفلاتر
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── PRODUCTS GRID ── -->
+        <div class="flex-1">
+            <!-- Active Filter Tags -->
+            <div id="active-filters" class="flex flex-wrap gap-2 mb-6">
+                @if (!string.IsNullOrEmpty(Model.Filter.Gender))
+                {
+                    <span class="bg-gold bg-opacity-20 border border-gold text-gold px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                        @(Model.Filter.Gender == "Female" ? "نسائي" : Model.Filter.Gender == "Male" ? "رجالي" : Model.Filter.Gender)
+                        <button onclick="removeGenderFilter()" class="hover:text-white">×</button>
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.Filter.Search))
+                {
+                    <span class="bg-gold bg-opacity-20 border border-gold text-gold px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                        "@Model.Filter.Search"
+                        <button onclick="removeSearchFilter()" class="hover:text-white">×</button>
+                    </span>
+                }
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="luxury-card rounded-2xl overflow-hidden group product-card"
+                         data-product-id="@product.Id">
+                        <!-- Image -->
+                        <div class="product-img-container relative bg-luxury-section h-52 md:h-60">
+                            <img src="@product.ImageUrl" alt="@product.NameAr"
+                                 class="w-full h-full object-cover"
+                                 onerror="this.src='/images/product-placeholder.svg'" />
+
+                            <!-- Badges -->
+                            <div class="absolute top-3 right-3 flex flex-col gap-1">
+                                @if (product.IsBestSeller)
+                                {
+                                    <span class="bg-gold text-black text-xs px-2 py-0.5 rounded-full font-bold ar-text">⭐ الأكثر مبيعاً</span>
+                                }
+                                @if (product.IsNewArrival)
+                                {
+                                    <span class="bg-luxury-black border border-gold text-gold text-xs px-2 py-0.5 rounded-full">✨ جديد</span>
+                                }
+                                @if (product.OriginalPriceKWD.HasValue)
+                                {
+                                    var d = (int)(((product.OriginalPriceKWD.Value - product.PriceKWD) / product.OriginalPriceKWD.Value) * 100);
+                                    <span class="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">-@d%</span>
+                                }
+                            </div>
+
+                            <!-- Wishlist -->
+                            <button onclick="toggleWishlist(@product.Id, this)" class="absolute top-3 left-3 w-9 h-9 bg-luxury-black bg-opacity-80 rounded-full flex items-center justify-center hover:bg-gold hover:text-black transition-all">
+                                <i class="far fa-heart text-sm"></i>
+                            </button>
+
+                            <!-- Quick Add Overlay -->
+                            <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button onclick="quickAddToCart(@product.Id, '@product.NameAr', @product.PriceKWD)" class="btn-gold px-5 py-2.5 rounded-xl text-sm font-bold">
+                                    <i class="fas fa-shopping-bag ml-1"></i>
+                                    <span class="ar-text">أضف للسلة</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="p-4">
+                            <p class="text-gray-500 text-xs mb-1 ar-text">@(product.Category?.NameAr ?? "")</p>
+                            <a href="/Product/Detail/@product.Id">
+                                <h3 class="font-bold text-white group-hover:text-gold transition-colors ar-text leading-tight">@product.NameAr</h3>
+                                <h3 class="font-bold text-white group-hover:text-gold transition-colors en-text hidden leading-tight text-sm">@product.NameEn</h3>
+                            </a>
+
+                            <div class="flex items-center gap-0.5 mt-1">
+                                @for (int s = 1; s <= 5; s++)
+                                {
+                                    <i class="fas fa-star text-xs @(s <= (int)product.Rating ? "text-gold" : "text-gray-700")"></i>
+                                }
+                                <span class="text-gray-500 text-xs mr-1">(@product.ReviewCount)</span>
+                            </div>
+
+                            <div class="flex items-center justify-between mt-3">
+                                <div>
+                                    <span class="text-lg font-black text-gold">@product.PriceKWD.ToString("F3") KD</span>
+                                    @if (product.OriginalPriceKWD.HasValue)
+                                    {
+                                        <span class="text-gray-600 text-xs line-through mr-1">@product.OriginalPriceKWD.Value.ToString("F3")</span>
+                                    }
+                                </div>
+                                <a href="/Product/Detail/@product.Id" class="btn-gold w-8 h-8 rounded-lg flex items-center justify-center text-xs">
+                                    <i class="fas fa-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Empty State -->
+            @if (!Model.Products.Any())
+            {
+                <div class="text-center py-20">
+                    <i class="fas fa-search text-gold text-5xl mb-4 opacity-30"></i>
+                    <h3 class="text-white text-xl font-bold mb-2 ar-text">لا توجد منتجات</h3>
+                    <p class="text-gray-500 ar-text">جرب فلاتر مختلفة أو ابحث بكلمات أخرى</p>
+                    <button onclick="clearFilters()" class="btn-gold px-6 py-3 rounded-xl mt-4 text-sm font-bold ar-text">
+                        عرض الكل
+                    </button>
+                </div>
+            }
+
+            <!-- Pagination / Load More -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="flex justify-center mt-12 gap-3">
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        <a href="/Shop?page=@p&sortBy=@Model.Filter.SortBy&gender=@Model.Filter.Gender&categoryId=@Model.Filter.CategoryId"
+                           class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all @(p == Model.Filter.Page ? "btn-gold" : "luxury-card border border-luxury-border hover:border-gold text-gray-400")">
+                            @p
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let filterTimeout;
+const currentFilters = {
+    search: '@Model.Filter.Search',
+    categoryId: '@Model.Filter.CategoryId',
+    gender: '@Model.Filter.Gender',
+    minPrice: '@Model.Filter.MinPrice',
+    maxPrice: '@Model.Filter.MaxPrice',
+    sortBy: '@Model.Filter.SortBy',
+    page: 1
+};
+
+function buildUrl(filters) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, v); });
+    return '/Shop?' + params.toString();
+}
+
+function applyFilter() {
+    currentFilters.categoryId = document.querySelector('input[name="category"]:checked')?.value || '';
+    currentFilters.gender = document.querySelector('input[name="gender"]:checked')?.value || '';
+    currentFilters.page = 1;
+    window.location.href = buildUrl(currentFilters);
+}
+
+function applySort(val) {
+    currentFilters.sortBy = val;
+    currentFilters.page = 1;
+    window.location.href = buildUrl(currentFilters);
+}
+
+function applyPriceFilter() {
+    currentFilters.minPrice = document.getElementById('min-price').value;
+    currentFilters.maxPrice = document.getElementById('max-price').value;
+    currentFilters.page = 1;
+    window.location.href = buildUrl(currentFilters);
+}
+
+function debounceSearch(val) {
+    clearTimeout(filterTimeout);
+    filterTimeout = setTimeout(() => {
+        currentFilters.search = val;
+        currentFilters.page = 1;
+        window.location.href = buildUrl(currentFilters);
+    }, 500);
+}
+
+function clearFilters() {
+    window.location.href = '/Shop';
+}
+
+function removeGenderFilter() {
+    currentFilters.gender = '';
+    window.location.href = buildUrl(currentFilters);
+}
+
+function removeSearchFilter() {
+    currentFilters.search = '';
+    window.location.href = buildUrl(currentFilters);
+}
+
+function toggleFilters() {
+    const panel = document.getElementById('filters-panel');
+    const chevron = document.getElementById('filter-chevron');
+    panel.classList.toggle('hidden');
+    chevron.classList.toggle('rotate-180');
+}
+</script>
+}
